@@ -52,7 +52,7 @@ def GetSNlikeGraph(graph, type_graph):
         our_graph = temp_graph
     return our_graph
 
-def GetGraph(SNtype, graph, type_graph, j,c,d):
+def GetGraph(SNtype, graph, type_graph, j,c,d,dict_args):
     print("in get graph")
     if SNtype:
         our_graph = GetSNlikeGraph(graph, type_graph)
@@ -65,6 +65,33 @@ def GetGraph(SNtype, graph, type_graph, j,c,d):
             our_graph = KCliqueExpander(j,c,d)
         if type_graph == "Complete":
             our_graph = nx.complete_graph(c)
+        if type_graph == "LFR":
+            # dict_args:
+            #   n:  int Number of nodes in the created graph.
+            #   tau1:   float   Power law exponent for the degree distribution of the created graph.
+            #   This value must be strictly greater than one.
+            #   tau2:   float   Power law exponent for the community size distribution in the created graph.
+            #   This value must be strictly greater than one.
+            #   mu: float   Fraction of inter-community edges incident to each node.
+            #   This value must be in the interval [0, 1].
+            #   average_degree: float   Desired average degree of nodes in the created graph.
+            #   This value must be in the interval [0, n].
+            #   min_degree: int Minimum degree of nodes in the created graph. This value must be in the interval [0, n].
+            #   Exactly one of this and average_degree must be specified, otherwise a NetworkXError is raised.
+            #   max_degree: int Maximum degree of nodes in the created graph.
+            #   min_community:  int Minimum size of communities in the graph.
+            #   max_community:  int Maximum size of communities in the graph.
+            #   tol:    float   Tolerance when comparing floats, specifically when comparing average degree values.
+            #   max_iters:  int Maximum number of iterations to try to create the community sizes, degree distribution,
+            #   and community affiliations.
+            #   seed:   integer, random_state, or None (default)    Indicator of random number generation state.
+            our_graph = nx.LFR_benchmark_graph(n=dict_args["n"], tau1=dict_args["tau1"], tau2=dict_args["tau2"],
+                                               mu=dict_args["mu"], min_degree=dict_args["min_degree"],
+                                               max_degree=dict_args["max_degree"],
+                                               min_community=dict_args["min_community"],
+                                               max_community=dict_args["max_community"],
+                                               tol=dict_args["tol"], max_iters=dict_args["max_iters"],
+                                               seed=dict_args["seed"])
     return our_graph
 
 def GetInitialOpinions(graph, p, gray_p):
@@ -89,9 +116,10 @@ def GetInitialOpinions(graph, p, gray_p):
 
 
 
-def Simulation(graph, SNtype, type_graph,p, gray_p,k, tresh, d, j, c):
+def Simulation(graph, SNtype, type_graph,p, gray_p,k, tresh, d, j, c,dict_args):
     #generate the graph
-    our_graph = GetGraph(graph=graph, SNtype=SNtype, type_graph=type_graph, d=d, j=j, c=c)
+    # dict_args is used for the purpose of passing multiple arguments for the generation of LFR networks.
+    our_graph = GetGraph(graph=graph, SNtype=SNtype, type_graph=type_graph, d=d, j=j, c=c, dict_args=dict_args)
 
     #generate the initial opinions of the graph
     our_graph = GetInitialOpinions(graph=our_graph, p=p, gray_p=gray_p)
