@@ -4,6 +4,7 @@ import os
 import random
 from decimal import Decimal
 from IMP import twitter_loc
+import matplotlib.pyplot as plt
 abs_path = os.path.abspath(os.path.dirname(__file__))
 
 def KClique(j,c):
@@ -70,6 +71,10 @@ def GetGraph(SNtype, graph, type_graph, d,dict_args):
             our_graph = KCliqueExpander(dict_args["num_cliques"],dict_args["clique_size"],d)
         if type_graph == "Complete":
             our_graph = nx.complete_graph(c)
+        if type_graph == "moderatelyExpander":
+            our_graph = moderatelyExpander(degree_of_each_supernode=dict_args["degree_of_each_supernode"],
+                                           number_of_supernodes=dict_args["number_of_supernodes"],
+                                           nodes_in_clique=dict_args["nodes_in_clique"])
         if type_graph == "LFR":
             # dict_args:
             #   n:  int Number of nodes in the created graph.
@@ -117,7 +122,27 @@ def GetInitialOpinions(graph, p, gray_p):
 
     return graph
 
+def moderatelyExpander(degree_of_each_supernode,number_of_supernodes,nodes_in_clique):
+    H=nx.random_regular_graph(d=degree_of_each_supernode,n=number_of_supernodes)
 
+    G=nx.complete_graph(n=nodes_in_clique)
+    H_nodes=list(H.nodes())
+
+    print("nodes : "+str(H_nodes))
+    for i in range(len(H_nodes)-1):
+        G = nx.disjoint_union(G, nx.complete_graph(n=nodes_in_clique))
+    for i in H_nodes:
+        edges_i = list(H.edges(i))
+        print("edges in " + str(i))
+        print(edges_i)
+        for j in range(len(edges_i)):
+            print(str(edges_i[j])+ " => ("+str(edges_i[j][0]*nodes_in_clique)+", "+str(edges_i[j][1]*nodes_in_clique)+")")
+            G.add_edge(edges_i[j][0]*nodes_in_clique, edges_i[j][1]*nodes_in_clique)
+        H.remove_node(i)
+
+    nx.draw(G)
+    plt.savefig("filename.png")
+    return G
 
 
 

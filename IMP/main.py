@@ -16,7 +16,10 @@ if __name__ == "__main__":
     # sample dict_args for K-CLique networks
     dict_args = {"num_cliques":10,"clique_size":100}
 
+    # sample dict_args for moderatelyExpander
+    dict_args = {"degree_of_each_supernode":3,"number_of_supernodes":4,"nodes_in_clique":5}
+
     # Simulation(graph="whatev", SNtype=False, type_graph="LFR", p=0.1, gray_p=0.1, k=4, c=20, tresh=0.10,
     #            d=1, j=4, dict_args=dict_args)
-    Simulation(graph="whatev", SNtype=False, type_graph="KClique", p=1/1000, gray_p=0, tresh=0.10,
+    Simulation(graph="whatev", SNtype=False, type_graph="moderatelyExpander", p=1/1000, gray_p=0, tresh=0.10,
                d=0,k=5, dict_args=dict_args)
