@@ -7,15 +7,20 @@ from IMP import twitter_loc
 abs_path = os.path.abspath(os.path.dirname(__file__))
 
 def KClique(j,c):
-    G = nx.complete_graph(n=j)
-    #create all the distinct disjoint cliques
-    for i in range(c-1):
-        G = nx.disjoint_union(G,nx.complete_graph(n=j))
-    #connect them with edges to make a cycle
-    for i in range(c):
-        G.add_edge(i, i+j)
-    #print(G)
-    #print(G.number_of_nodes())
+    # G = nx.complete_graph(n=j)
+    # #create all the distinct disjoint cliques
+    # for i in range(c-1):
+    #     G = nx.disjoint_union(G,nx.complete_graph(n=j))
+    # #connect them with edges to make a cycle
+    # for i in range(c):
+    #     G.add_edge(i, i+j)
+    # #print(G)
+    # #print(G.number_of_nodes())
+
+
+    G=nx.ring_of_cliques(j,c)
+
+
     return G
 
 def KCliqueExpander(j,c,d):
@@ -52,7 +57,7 @@ def GetSNlikeGraph(graph, type_graph):
         our_graph = temp_graph
     return our_graph
 
-def GetGraph(SNtype, graph, type_graph, j,c,d,dict_args):
+def GetGraph(SNtype, graph, type_graph, d,dict_args):
     print("in get graph")
     if SNtype:
         our_graph = GetSNlikeGraph(graph, type_graph)
@@ -60,9 +65,9 @@ def GetGraph(SNtype, graph, type_graph, j,c,d,dict_args):
         if type_graph == "cycle":
             our_graph = nx.cycle_graph(c)
         if type_graph == "KClique":
-            our_graph = KClique(j,c)
+            our_graph = KClique(dict_args["num_cliques"],dict_args["clique_size"])
         if type_graph == "KCliqueExpander":
-            our_graph = KCliqueExpander(j,c,d)
+            our_graph = KCliqueExpander(dict_args["num_cliques"],dict_args["clique_size"],d)
         if type_graph == "Complete":
             our_graph = nx.complete_graph(c)
         if type_graph == "LFR":
@@ -116,10 +121,10 @@ def GetInitialOpinions(graph, p, gray_p):
 
 
 
-def Simulation(graph, SNtype, type_graph,p, gray_p,k, tresh, d, j, c,dict_args):
+def Simulation(graph, SNtype, type_graph,p, gray_p, tresh, d, dict_args,k):
     #generate the graph
     # dict_args is used for the purpose of passing multiple arguments for the generation of LFR networks.
-    our_graph = GetGraph(graph=graph, SNtype=SNtype, type_graph=type_graph, d=d, j=j, c=c, dict_args=dict_args)
+    our_graph = GetGraph(graph=graph, SNtype=SNtype, type_graph=type_graph, d=d, dict_args=dict_args)
 
     #generate the initial opinions of the graph
     our_graph = GetInitialOpinions(graph=our_graph, p=p, gray_p=gray_p)
