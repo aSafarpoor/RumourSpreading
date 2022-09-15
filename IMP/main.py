@@ -21,5 +21,5 @@ if __name__ == "__main__":
 
     # Simulation(graph="whatev", SNtype=False, type_graph="LFR", p=0.1, gray_p=0.1, k=4, c=20, tresh=0.10,
     #            d=1, j=4, dict_args=dict_args)
-    Simulation(graph="whatev", SNtype=False, type_graph="moderatelyExpander", p=1/1000, gray_p=0, tresh=0.10,
+    Simulation(graph=twitter_loc, SNtype=True, type_graph="BA", p=1/1000, gray_p=0, tresh=0.10,
                d=0,k=5, dict_args=dict_args)

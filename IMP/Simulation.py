@@ -158,6 +158,8 @@ def Simulation(graph, SNtype, type_graph,p, gray_p, tresh, d, dict_args,k):
     stop = 0
     phase = 0
     round = 1
+    sum_jaccard_sim = 0
+    count = 0
 
     #initialize the field temp_vote and stamp
     #note that -5 is just a placeholder
@@ -209,6 +211,8 @@ def Simulation(graph, SNtype, type_graph,p, gray_p, tresh, d, dict_args,k):
                         intersection_neigh = neighset.intersection(neighsetneigh)
                         union_neigh = neighset.union(neighsetneigh)
                         jaccard_sim = Decimal(len(intersection_neigh) / len(union_neigh))
+                        sum_jaccard_sim += jaccard_sim
+                        count = count + 1
                         #print("jaccard_sim", jaccard_sim)
                         denom = Decimal(2**(our_graph.nodes[node]['stamp']))
                         r = (jaccard_sim / denom)
@@ -244,6 +248,6 @@ def Simulation(graph, SNtype, type_graph,p, gray_p, tresh, d, dict_args,k):
 
 
 
-
+    print("av jaccard", sum_jaccard_sim/count)
     return [list_num_white, list_num_black, list_num_gray]
 
