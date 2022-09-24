@@ -210,7 +210,9 @@ def moderatelyExpander(degree_of_each_supernode, number_of_supernodes, nodes_in_
 
 
 def Simulation(graph, SNtype, type_graph, num_black, gray_p, tresh, d, dict_args, k,
-               dict_counter_measure={"id": COUNTER_MEASURE_NONE}):
+               dict_counter_measure={"id": COUNTER_MEASURE_NONE},seed=None):
+
+    random.seed(seed)
     # generate the graph
     # dict_args is used for the purpose of passing multiple arguments for the generation of LFR networks.
     our_graph = GetGraph(graph=graph, SNtype=SNtype, type_graph=type_graph, d=d, dict_args=dict_args)
