@@ -4,6 +4,7 @@ import os
 import random
 from decimal import Decimal
 import powerlaw
+import networkx.algorithms.community as nx_comm
 from IMP import twitter_loc
 import matplotlib.pyplot as plt
 import math
@@ -17,6 +18,7 @@ COUNTER_MEASURE_NONE = 0
 COUNTER_MEASURE_COUNTER_RUMOR_SPREAD = 1
 COUNTER_MEASURE_HEAR_FROM_AT_LEAST_TWO = 2
 COUNTER_MEASURE_DELAYED_SPREADING = 3
+COUNTER_MEASURE_COMMUNITY_DETECTION = 4
 # counter measure IDs
 # node color IDs
 NODE_COLOR_BLACK = 1
@@ -210,8 +212,7 @@ def moderatelyExpander(degree_of_each_supernode, number_of_supernodes, nodes_in_
 
 
 def Simulation(graph, SNtype, type_graph, num_black, gray_p, tresh, d, dict_args, k,
-               dict_counter_measure={"id": COUNTER_MEASURE_NONE},seed=None):
-
+               dict_counter_measure={"id": COUNTER_MEASURE_NONE}, seed=None):
     random.seed(seed)
     # generate the graph
     # dict_args is used for the purpose of passing multiple arguments for the generation of LFR networks.
@@ -257,6 +258,18 @@ def Simulation(graph, SNtype, type_graph, num_black, gray_p, tresh, d, dict_args
                 green_nodes_initial = [r]
                 cur_num_green += 1
                 cur_num_white -= 1
+    threshold_detection = 0
+    threshold_block = 0
+    cs = []
+    if (dict_counter_measure["id"] == COUNTER_MEASURE_COMMUNITY_DETECTION):
+        threshold_detection = dict_counter_measure["threshold_detection"]
+        threshold_block = dict_counter_measure["threshold_block"]
+        cs = nx_comm.louvain_communities(our_graph)
+        c_ind = 0
+        for c in cs:
+            for n in c:
+                our_graph.nodes[n]["comm"] = c_ind
+            c_ind += 1
 
     list_num_gray = [cur_num_gray]
     list_num_black = [cur_num_black]
@@ -471,6 +484,65 @@ def Simulation(graph, SNtype, type_graph, num_black, gray_p, tresh, d, dict_args
                                 change = change + 1
                                 cur_num_black = cur_num_black + 1
                                 cur_num_white = cur_num_white - 1
+            elif (dict_counter_measure["id"] == COUNTER_MEASURE_COMMUNITY_DETECTION):
+                black_nodes = [node for node in our_graph.nodes if our_graph.nodes[node]['vote'] == NODE_COLOR_BLACK]
+                maxes = []
+                if (len(black_nodes) >= (int)(our_graph.number_of_nodes() * threshold_detection)):
+                    black_ratio_per_community = []
+                    counter = 0
+                    for c in cs:
+                        black_ratio_per_community.append(0)
+                        for n in c:
+                            if(our_graph.nodes[n]['vote']==NODE_COLOR_BLACK):
+                                black_ratio_per_community[counter] += 1
+                        black_ratio_per_community[counter] = black_ratio_per_community[counter] / len(c)
+
+                        if black_ratio_per_community[counter] >= threshold_block:
+                            maxes.append(counter)
+                        counter += 1
+                for node in black_nodes:
+                    our_graph.nodes[node]['stamp'] = our_graph.nodes[node]['stamp'] + 1
+                    # the node has been black for k rounds and becomes gray
+                    if our_graph.nodes[node]['stamp'] == k:
+                        # print("becoming gray", node)
+                        our_graph.nodes[node]['vote'] = NODE_COLOR_GRAY
+                        cur_num_gray = cur_num_gray + 1
+                        cur_num_black = cur_num_black - 1
+                    else:
+                        # print("node", node)
+                        neighlist = list(our_graph.adj[node])
+                        # print("neighlist",neighlist)
+                        # only consider the white neighbors these are the only ones that can be influenced
+                        for neigh in [neigh for neigh in neighlist if
+                                      our_graph.nodes[neigh]['vote'] == NODE_COLOR_WHITE]:
+                            # manually add the nodes to their own neighborhoods
+                            neighset = set(our_graph.adj[node])
+                            neighset.add(node)
+                            neighsetneigh = set(our_graph.adj[neigh])
+                            neighsetneigh.add(neigh)
+                            intersection_neigh = neighset.intersection(neighsetneigh)
+                            union_neigh = neighset.union(neighsetneigh)
+                            jaccard_sim = Decimal(len(intersection_neigh) / len(union_neigh))
+                            sum_jaccard_sim += jaccard_sim
+                            count = count + 1
+                            # print("jaccard_sim", jaccard_sim)
+                            denom = Decimal(2 ** (our_graph.nodes[node]['stamp']))
+                            r = (jaccard_sim / denom)
+                            rand = random.random()
+                            # print("r and rand", r, rand)
+                            if rand < r:
+                                if(our_graph.nodes[node]["comm"] in maxes):
+                                    if(our_graph.nodes[neigh]["comm"]!=our_graph.nodes[node]["comm"]):
+                                        print("the spread of rumor from #" + str(node) + " to #" +
+                                                  str(neigh) + " has been blocked because #" + str(
+                                                node) + " is in the blocked community")
+                                        continue
+                                # print("neigh",neigh) #see if there are duplicates
+                                our_graph.nodes[neigh]['vote'] = NODE_COLOR_BLACK
+                                change = change + 1
+                                cur_num_black = cur_num_black + 1
+                                cur_num_white = cur_num_white - 1
+                                # print("change", change)
             print("round", round, "phase", phase, cur_num_gray, cur_num_white, cur_num_black, cur_num_green)
             list_num_white.append(cur_num_white)
             list_num_black.append(cur_num_black)
