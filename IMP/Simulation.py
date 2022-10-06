@@ -9,6 +9,7 @@ from IMP import twitter_loc
 import matplotlib.pyplot as plt
 import math
 from statistics import mean
+import time
 
 abs_path = os.path.abspath(os.path.dirname(__file__))
 datasets_path = os.path.join(os.path.abspath(""), "Datasets")
@@ -19,6 +20,7 @@ COUNTER_MEASURE_COUNTER_RUMOR_SPREAD = 1
 COUNTER_MEASURE_HEAR_FROM_AT_LEAST_TWO = 2
 COUNTER_MEASURE_DELAYED_SPREADING = 3
 COUNTER_MEASURE_COMMUNITY_DETECTION = 4
+COUNTER_MEASURE_DOUBT_SPREADING = 5
 # counter measure IDs
 # node color IDs
 NODE_COLOR_BLACK = 1
@@ -271,6 +273,27 @@ def Simulation(graph, SNtype, type_graph, num_black, gray_p, tresh, d, dict_args
                 our_graph.nodes[n]["comm"] = c_ind
             c_ind += 1
 
+    doubt_counter = 0
+    negative_doubt_shift=0.0
+    positive_doubt_shift=0.0
+    doubt_spreader = []
+    doubt_ls = []
+    if (dict_counter_measure["id"] == COUNTER_MEASURE_DOUBT_SPREADING):
+        negative_doubt_shift=dict_counter_measure["negative_doubt_shift"]
+        positive_doubt_shift=dict_counter_measure["positive_doubt_shift"]
+        for node in our_graph.nodes():
+            our_graph.nodes[node]["doubt"] = random.normalvariate(0.5, 0.16)
+            our_graph.nodes[node]['origin'] = []
+            if (our_graph.nodes[node]["doubt"] > 1):
+                our_graph.nodes[node]["doubt"] = 1
+            if (our_graph.nodes[node]["doubt"] < 0):
+                our_graph.nodes[node]["doubt"] = 0
+            doubt_ls.append(our_graph.nodes[node]["doubt"])
+        plt.clf()
+        plt.hist(doubt_ls, bins=30)
+        plt.show(block=False)
+        plt.pause(1)
+        plt.close()
     list_num_gray = [cur_num_gray]
     list_num_black = [cur_num_black]
     list_num_white = [cur_num_white]
@@ -493,7 +516,7 @@ def Simulation(graph, SNtype, type_graph, num_black, gray_p, tresh, d, dict_args
                     for c in cs:
                         black_ratio_per_community.append(0)
                         for n in c:
-                            if(our_graph.nodes[n]['vote']==NODE_COLOR_BLACK):
+                            if (our_graph.nodes[n]['vote'] == NODE_COLOR_BLACK):
                                 black_ratio_per_community[counter] += 1
                         black_ratio_per_community[counter] = black_ratio_per_community[counter] / len(c)
 
@@ -531,11 +554,11 @@ def Simulation(graph, SNtype, type_graph, num_black, gray_p, tresh, d, dict_args
                             rand = random.random()
                             # print("r and rand", r, rand)
                             if rand < r:
-                                if(our_graph.nodes[node]["comm"] in maxes):
-                                    if(our_graph.nodes[neigh]["comm"]!=our_graph.nodes[node]["comm"]):
+                                if (our_graph.nodes[node]["comm"] in maxes):
+                                    if (our_graph.nodes[neigh]["comm"] != our_graph.nodes[node]["comm"]):
                                         print("the spread of rumor from #" + str(node) + " to #" +
-                                                  str(neigh) + " has been blocked because #" + str(
-                                                node) + " is in the blocked community")
+                                              str(neigh) + " has been blocked because #" + str(
+                                            node) + " is in the blocked community")
                                         continue
                                 # print("neigh",neigh) #see if there are duplicates
                                 our_graph.nodes[neigh]['vote'] = NODE_COLOR_BLACK
@@ -543,6 +566,89 @@ def Simulation(graph, SNtype, type_graph, num_black, gray_p, tresh, d, dict_args
                                 cur_num_black = cur_num_black + 1
                                 cur_num_white = cur_num_white - 1
                                 # print("change", change)
+            elif (dict_counter_measure["id"] == COUNTER_MEASURE_DOUBT_SPREADING):
+                for node in [node for node in our_graph.nodes if our_graph.nodes[node]['vote'] == NODE_COLOR_BLACK]:
+                    our_graph.nodes[node]['stamp'] = our_graph.nodes[node]['stamp'] + 1
+                    # the node has been black for k rounds and becomes gray
+                    if our_graph.nodes[node]['stamp'] == k:
+                        # print("becoming gray", node)
+                        our_graph.nodes[node]['vote'] = NODE_COLOR_GRAY
+                        cur_num_gray = cur_num_gray + 1
+                        cur_num_black = cur_num_black - 1
+                    else:
+                        # print("node", node)
+                        neighlist = list(our_graph.adj[node])
+                        # print("neighlist",neighlist)
+                        # only consider the white neighbors these are the only ones that can be influenced
+                        for neigh in [neigh for neigh in neighlist if
+                                      our_graph.nodes[neigh]['vote'] == NODE_COLOR_WHITE]:
+                            # manually add the nodes to their own neighborhoods
+                            neighset = set(our_graph.adj[node])
+                            neighset.add(node)
+                            neighsetneigh = set(our_graph.adj[neigh])
+                            neighsetneigh.add(neigh)
+                            intersection_neigh = neighset.intersection(neighsetneigh)
+                            union_neigh = neighset.union(neighsetneigh)
+                            jaccard_sim = Decimal(len(intersection_neigh) / len(union_neigh))
+                            sum_jaccard_sim += jaccard_sim
+                            count = count + 1
+                            # print("jaccard_sim", jaccard_sim)
+                            denom = Decimal(2 ** (our_graph.nodes[node]['stamp']))
+                            r = (jaccard_sim / denom)
+                            rand = random.random()
+                            # print("r and rand", r, rand)
+                            if rand < r:
+                                # print("neigh",neigh) #see if there are duplicates
+                                rand2_doubt = random.random()
+                                if (our_graph.nodes[neigh]['doubt'] < rand2_doubt):
+                                    our_graph.nodes[neigh]['vote'] = NODE_COLOR_BLACK
+                                    change = change + 1
+                                    cur_num_black = cur_num_black + 1
+                                    cur_num_white = cur_num_white - 1
+
+                                    # reduce doubt
+                                    delta_doubt = random.uniform(0, negative_doubt_shift)
+                                    # print("negative delta_doubt: "+str(delta_doubt))
+                                    our_graph.nodes[neigh]['doubt'] += delta_doubt
+                                    our_graph.nodes[neigh]['origin'].append((doubt_counter, delta_doubt))
+                                    doubt_counter += 1
+                                    doubt_spreader.append(neigh)
+                                    if (our_graph.nodes[neigh]['doubt'] < 0):
+                                        our_graph.nodes[neigh]['doubt'] = 0
+                                else:
+                                    # add doubt
+                                    delta_doubt = random.uniform(0, positive_doubt_shift)
+                                    # print("positive delta_doubt: "+str(delta_doubt))
+                                    our_graph.nodes[neigh]['doubt'] += delta_doubt
+                                    our_graph.nodes[neigh]['origin'].append((doubt_counter, delta_doubt))
+                                    doubt_counter += 1
+                                    doubt_spreader.append(neigh)
+                                    if (our_graph.nodes[neigh]['doubt'] > 1):
+                                        our_graph.nodes[neigh]['doubt'] = 1
+
+                # spread doubts
+                print("Updating doubt values")
+                while (len(doubt_spreader) > 0):
+                    d_node = doubt_spreader.pop()
+                    if our_graph.nodes[d_node]["vote"] == NODE_COLOR_GRAY:
+                        continue
+                    (d, delta) = our_graph.nodes[d_node]['origin'][-1]
+                    for neigh in our_graph.neighbors(d_node):
+                        if (d in [x for (x, y) in our_graph.nodes[d_node]['origin']]):
+                            continue
+                        else:
+                            delta_doubt = random.uniform(0, delta)
+                            our_graph.nodes[neigh]['doubt'] += delta_doubt
+                            our_graph.nodes[neigh]['origin'].append((d, delta_doubt))
+                            doubt_spreader.append(neigh)
+                doubt_ls = []
+                for node in our_graph.nodes():
+                    doubt_ls.append(our_graph.nodes[node]["doubt"])
+                plt.clf()
+                plt.hist(doubt_ls, bins=30)
+                plt.show(block=False)
+                plt.pause(1)
+                plt.close()
             print("round", round, "phase", phase, cur_num_gray, cur_num_white, cur_num_black, cur_num_green)
             list_num_white.append(cur_num_white)
             list_num_black.append(cur_num_black)
