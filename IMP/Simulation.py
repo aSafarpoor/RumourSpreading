@@ -14,7 +14,7 @@ import time
 
 #charlotte's path
 abs_path = os.path.abspath(os.path.dirname(__file__))
-#sajjad's path 
+#sajjad's path
 #datasets_path = os.path.join(os.path.abspath(""), "Datasets")
 
 # counter measure IDs
@@ -105,7 +105,7 @@ def GetSNlikeGraph(graph, type_graph):
     return our_graph
 
 
-def GetGraph(graph, type_graph, d, dict_args):
+def GetGraph(graph, type_graph, dict_args):
     temp_graph = nx.read_edgelist(os.path.join(abs_path, graph), create_using=nx.Graph(), nodetype=int)
     n = temp_graph.number_of_nodes()
     mapping = dict(zip(temp_graph, range(0, temp_graph.number_of_nodes())))
@@ -113,7 +113,7 @@ def GetGraph(graph, type_graph, d, dict_args):
 
     total = sum(j for i, j in list(temp_graph.degree(temp_graph.nodes)))
     av_deg = total / temp_graph.number_of_nodes()
-    print("av_deg", av_deg)
+    #print("av_deg", av_deg)
     p = total / (temp_graph.number_of_nodes() * (temp_graph.number_of_nodes() - 1))
     d = round(n*p/2) *2
 
@@ -128,8 +128,8 @@ def GetGraph(graph, type_graph, d, dict_args):
     for i in range(1, max_degree + 1):
         num_nodes.append(degrees.get(i, 0))
 
-    fit = powerlaw.Fit(num_nodes)
-    print(fit.power_law.alpha)
+    #fit = powerlaw.Fit(num_nodes)
+    #print(fit.power_law.alpha)
 
     if type_graph == 'ER':
         # print("ER graph")
@@ -163,7 +163,7 @@ def GetGraph(graph, type_graph, d, dict_args):
         our_graph = moderatelyExpander(degree_of_each_supernode=dict_args["degree_of_supernodes"],
                                            number_of_supernodes=dict_args["number_of_supernodes"],
                                            nodes_in_clique=dict_args["nodes_in_clique"])
-    elif type_graph == "LFR":
+    #elif type_graph == "LFR":
         # dict_args:
         #   n:  int Number of nodes in the created graph.
         #   tau1:   float   Power law exponent for the degree distribution of the created graph.
@@ -183,16 +183,16 @@ def GetGraph(graph, type_graph, d, dict_args):
         #   max_iters:  int Maximum number of iterations to try to create the community sizes, degree distribution,
         #   and community affiliations.
         #   seed:   integer, random_state, or None (default)    Indicator of random number generation state.
-        our_graph = nx.LFR_benchmark_graph(n=dict_args["n"], tau1=dict_args["tau1"], tau2=dict_args["tau2"],
-                                            mu=dict_args["mu"], average_degree=dict_args["average_degree"],
-                                            min_community=dict_args["min_community"],
-                                            tol=dict_args["tol"], max_iters=dict_args["max_iters"],
-                                            seed=dict_args["seed"])
-        print("edges: " + str(our_graph.number_of_edges()))
-        print("nodes: " + str(len(our_graph.nodes())))
-        print("is_connected: " + str(nx.is_connected(our_graph)))
+        # our_graph = nx.LFR_benchmark_graph(n=dict_args["n"], tau1=dict_args["tau1"], tau2=dict_args["tau2"],
+        #                                    mu=dict_args["mu"], average_degree=dict_args["average_degree"],
+        #                                    min_community=dict_args["min_community"],
+        #                                    tol=dict_args["tol"], max_iters=dict_args["max_iters"],
+        #                                    seed=dict_args["seed"])
+        #print("edges: " + str(our_graph.number_of_edges()))
+        #print("nodes: " + str(len(our_graph.nodes())))
+        #print("is_connected: " + str(nx.is_connected(our_graph)))
 
-        print("average degree: " + str((mean([val for (node, val) in our_graph.degree()]))))
+        #print("average degree: " + str((mean([val for (node, val) in our_graph.degree()]))))
         # plt.savefig("filenameLFR.png")
 
     return our_graph
@@ -200,7 +200,6 @@ def GetGraph(graph, type_graph, d, dict_args):
 
 def GetInitialOpinions(graph, num_red, gray_p):
     num_red_c = 0
-    print("in get initial opinions")
     for node in graph.nodes:
         graph.nodes[node]['hit_counter'] = 0
         graph.nodes[node]['sleep_timer'] = 0
@@ -214,7 +213,7 @@ def GetInitialOpinions(graph, num_red, gray_p):
         r_node = random.randint(0, graph.number_of_nodes() - 1)
         if graph.nodes[r_node]['vote'] == NODE_COLOR_WHITE:
             graph.nodes[r_node]['vote'] = NODE_COLOR_RED
-            print("black node's degree: ", graph.degree(r_node))
+            #print("black node's degree: ", graph.degree(r_node))
             num_red_c += 1
 
     return graph
@@ -247,7 +246,83 @@ def moderatelyExpander(degree_of_each_supernode, number_of_supernodes, nodes_in_
     return G
 
 
-def Simulation(graph, type_graph, num_red, gray_p, tresh, d, dict_args, k,
+def Simulation_no_countermeasure(graph, type_graph, num_red, k, dict_args):
+    our_graph = GetGraph(graph=graph, type_graph=type_graph, dict_args=dict_args)
+    our_graph = GetInitialOpinions(graph=our_graph, num_red=num_red, gray_p=0)
+    stop = 0
+    phase = 0
+    sum_jaccard_sim = 0
+    count = 0
+    n = our_graph.number_of_nodes()
+
+    for node in our_graph.nodes:
+        #stamp indicates the number of rounds a node has been black
+        our_graph.nodes[node]['stamp'] = 0
+
+    cur_num_red = num_red
+    cur_num_gray = 0
+    cur_num_white = our_graph.number_of_nodes() - num_red
+    list_num_gray = [cur_num_gray]
+    list_num_black = [cur_num_red]
+    list_num_white = [cur_num_white]
+
+    step = 1
+    while stop != 1:
+        phase = phase + 1
+        change = 0
+        for round in range(k + 1):
+            for node in [node for node in our_graph.nodes if our_graph.nodes[node]['vote'] == NODE_COLOR_RED]:
+                our_graph.nodes[node]['stamp'] = our_graph.nodes[node]['stamp'] + 1
+                # the node has been black for k rounds and becomes gray
+                if our_graph.nodes[node]['stamp'] == k:
+                    our_graph.nodes[node]['vote'] = NODE_COLOR_GRAY
+                    cur_num_gray = cur_num_gray + 1
+                    cur_num_red = cur_num_red - 1
+                else:
+                    neighlist = list(our_graph.adj[node])
+                    # only consider the white neighbors these are the only ones that can be influenced
+                    for neigh in [neigh for neigh in neighlist if
+                                  our_graph.nodes[neigh]['vote'] == NODE_COLOR_WHITE]:
+                        # manually add the nodes to their own neighborhoods
+                        neighset = set(our_graph.adj[node])
+                        neighset.add(node)
+                        neighsetneigh = set(our_graph.adj[neigh])
+                        neighsetneigh.add(neigh)
+                        intersection_neigh = neighset.intersection(neighsetneigh)
+                        union_neigh = neighset.union(neighsetneigh)
+                        jaccard_sim = Decimal(len(intersection_neigh) / len(union_neigh))
+                        sum_jaccard_sim += jaccard_sim
+                        count = count + 1
+                        denom = Decimal(2 ** (our_graph.nodes[node]['stamp']))
+                        r = (jaccard_sim / denom)
+                        rand = random.random()
+                        if rand < r:
+                            our_graph.nodes[neigh]['vote'] = NODE_COLOR_RED
+                            change = change + 1
+                            cur_num_red = cur_num_red + 1
+                            cur_num_white = cur_num_white - 1
+
+            list_num_white.append(cur_num_white)
+            list_num_black.append(cur_num_red)
+            list_num_gray.append(cur_num_gray)
+
+            step += 1
+            if change == 0:
+                stop = 1
+
+    return list_num_gray, n
+
+
+
+
+
+
+
+
+
+
+
+def Simulation(graph, type_graph, num_red, d, dict_args, k,
                dict_counter_measure={"id": COUNTER_MEASURE_NONE}, seed=None):
     random.seed(seed)
     # generate the graph
@@ -255,19 +330,17 @@ def Simulation(graph, type_graph, num_red, gray_p, tresh, d, dict_args, k,
     our_graph = GetGraph(graph=graph, type_graph=type_graph, d=d, dict_args=dict_args)
 
     # generate the initial opinions of the graph
-    our_graph = GetInitialOpinions(graph=our_graph, num_red=num_red, gray_p=gray_p)
+    our_graph = GetInitialOpinions(graph=our_graph, num_red=num_red, gray_p=dict_counter_measure['gray_p'])
 
     # now we consider the update rule
     stop = 0
     phase = 0
-    round = 1
     sum_jaccard_sim = 0
     count = 0
 
-    # initialize the field temp_vote and stamp
-    # note that -5 is just a placeholder
+
     for node in our_graph.nodes:
-        # our_graph.nodes[node]['temp_vote'] = -5
+        #stamp indicates the number of rounds a node has been black
         our_graph.nodes[node]['stamp'] = 0
         if (dict_counter_measure["id"] == COUNTER_MEASURE_DELAYED_SPREADING):
             if (our_graph.nodes[node]['vote'] == NODE_COLOR_RED):
@@ -282,9 +355,9 @@ def Simulation(graph, type_graph, num_red, gray_p, tresh, d, dict_args, k,
     whitenodes_initial = [node for node in our_graph.nodes if our_graph.nodes[node]['vote'] == NODE_COLOR_WHITE]
     cur_num_white = len(whitenodes_initial)
 
-    green_nodes_initial = []
+    #green_nodes_initial = []
     cur_num_green = 0
-    list_num_green = []
+    #list_num_green = []
     if (dict_counter_measure["id"] == COUNTER_MEASURE_COUNTER_RUMOR_SPREAD):
         while (cur_num_green < dict_counter_measure["num_green"]):
             r = random.randint(0, our_graph.number_of_nodes() - 1)
@@ -699,3 +772,5 @@ def Simulation(graph, type_graph, num_red, gray_p, tresh, d, dict_args, k,
 
     # print("av jaccard", sum_jaccard_sim/count)
     return [list_num_white, list_num_black, list_num_gray, list_num_green]
+
+
