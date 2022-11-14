@@ -1,22 +1,46 @@
 
-
 import numpy as np
-import pandas as pd
-from IMP.Simulation import Simulation_no_countermeasure
+#import pandas as pd
+from IMP.Simulation import *
 from IMP import fb_loc
 
+#charlotte's path
+abs_path = os.path.abspath(os.path.dirname(__file__))
+#sajjad's path
+#datasets_path = os.path.join(os.path.abspath(""), "Datasets")
+
+# counter measure IDs
+COUNTER_MEASURE_NONE = 0
+COUNTER_MEASURE_COUNTER_RUMOR_SPREAD = 1
+COUNTER_MEASURE_HEAR_FROM_AT_LEAST_TWO = 2
+COUNTER_MEASURE_DELAYED_SPREADING = 3
+COUNTER_MEASURE_COMMUNITY_DETECTION = 4
+COUNTER_MEASURE_DOUBT_SPREADING = 5
+COUNTER_MEASURE_TRIANGLE = 6
+# counter measure IDs
+# node color IDs
+NODE_COLOR_RED = 1
+NODE_COLOR_WHITE = -1
+NODE_COLOR_GRAY = 0
+NODE_COLOR_RESERVED = 2
+NODE_COLOR_GREEN = 3
 
 
 
 
 
+def BigSimulation(num_runs, graph_loc, type_graph, num_red,k, dict_args, dict_counter_measure):
+    our_graph = GetGraph(graph_loc=graph_loc, type_graph=type_graph, dict_args=dict_args)
+    our_graph = GetInitialOpinions(graph=our_graph, num_red=num_red,gray_p=0)
+    averages = averaging(num_runs=num_runs, our_graph=our_graph, type_graph=type_graph,num_red=num_red, k=k, dict_args=dict_args, dict_counter_measure=dict_counter_measure)
+    return averages
 
 
 
-def averaging(num_runs,graph, type_graph, num_red, k, dict_args):
+def averaging(num_runs,our_graph, type_graph, num_red, k, dict_args, dict_counter_measure):
     listoflists= []
     for i in range(num_runs):
-        graylist, n = Simulation_no_countermeasure(graph, type_graph, num_red, k, dict_args)
+        graylist, n = Simulation_Charlotte(our_graph=our_graph, type_graph=type_graph, num_red=num_red, k=k, dict_args=dict_args, dict_counter_measure=dict_counter_measure)
         listoflists.append(graylist)
 
     #find the list of maximum length
@@ -40,9 +64,25 @@ def averaging(num_runs,graph, type_graph, num_red, k, dict_args):
 
 
 
+def averaging_acorss_experiments(listoflists):
+    #find the list of maximum length
+    maxlen = len(listoflists[0])
+    for i in range(1, len(listoflists)):
+        if len(listoflists[i]) > maxlen:
+            maxlen = len(listoflists[i])
 
-#listoflists = [[0, 0, 0, 0, 0, 1, 3, 9, 13, 30, 78, 137, 148, 160, 164, 170, 173, 176, 177, 177, 177, 177, 177, 177, 177], [0, 0, 0, 0, 0, 1, 76, 220, 312, 468, 590, 670, 717, 774, 814, 843, 864, 874, 880, 889, 892, 896, 896, 896, 896], [0, 0, 0, 0, 0, 1, 7, 61, 170, 276, 623, 898, 1063, 1307, 1658, 2019, 2291, 2458, 2628, 2785, 2860, 2927, 2963, 2977, 2983, 2986, 2986, 2986, 2986, 2986, 2986]]
-#averaging(listoflists=listoflists, num_runs=3, type_graph="SN", graph=fb_loc, num_red=1, dict_args={},k=5)
+    # padd all the lists to the max length and padd with the last value
+    padded_listoflists = []
+    for i in listoflists:
+        padding = [i[-1]] * (maxlen - len(i))
+        i.extend(padding)
+        print(i)
+        padded_listoflists.append(i)
+    #print(padded_listoflists)
+    #print(len(padded_listoflists))
+
+    return padded_listoflists
+
 
 
 
