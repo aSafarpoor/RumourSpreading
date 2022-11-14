@@ -15,8 +15,15 @@ from Utility.dataset_setup import *
 
 
 if __name__ == "__main__":
-    print("")
-    averaging(num_runs=20, graph=fb_loc, type_graph='ER', num_red=1, k=5, dict_args={})
+    from IMP.averaging import *
+if __name__ == "__main__":
+    dict_counter_measure = {'id': COUNTER_MEASURE_NONE}
+    dict_args = {"degree_of_supernodes": 50, "number_of_supernodes": 1000, "nodes_in_clique": 16}
+
+
+
+    list_gray = BigSimulation(num_runs=10, graph_loc=fb_loc, type_graph="moderatelyExpander", num_red=1, k=5, dict_args=dict_args,dict_counter_measure=dict_counter_measure)
+    
 
     """
     To run experiments on graphs, we use dictionaries like `dict_args_ER_2000`.
