@@ -31,7 +31,6 @@ NODE_COLOR_GREEN = 3
 
 def BigSimulation(num_runs, graph_loc, type_graph, num_red,k, dict_args, dict_counter_measure):
     our_graph = GetGraph(graph_loc=graph_loc, type_graph=type_graph, dict_args=dict_args)
-    our_graph = GetInitialOpinions(graph=our_graph, num_red=num_red,gray_p=0)
     averages = averaging(num_runs=num_runs, our_graph=our_graph, type_graph=type_graph,num_red=num_red, k=k, dict_args=dict_args, dict_counter_measure=dict_counter_measure)
     return averages
 
