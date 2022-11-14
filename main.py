@@ -10,12 +10,9 @@ from Simulation import *
 from averaging import averaging
 from Utility.dataset_setup import facebook, twitter, slashdot, pokec
 from Utility.dataset_setup import *
+from IMP.averaging import *
 
 # imports (END)
-
-
-if __name__ == "__main__":
-    from IMP.averaging import *
 if __name__ == "__main__":
     dict_counter_measure = {'id': COUNTER_MEASURE_NONE}
     dict_args = {"degree_of_supernodes": 50, "number_of_supernodes": 1000, "nodes_in_clique": 16}
