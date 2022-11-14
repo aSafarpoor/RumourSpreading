@@ -294,19 +294,21 @@ def GetInitialOpinions(graph, num_red, gray_p):
     for node in graph.nodes:
         graph.nodes[node]['hit_counter'] = 0
         graph.nodes[node]['sleep_timer'] = 0
+        graph.nodes[node]['stamp'] = 0
+        graph.nodes[node]['traingle'] = 0
         if (random.random() < gray_p):
             # these are the nodes that will have vote gray and thus are not affected by the neighbours
-            graph.nodes[node]['vote'] = NODE_COLOR_ORANGE
+            graph.nodes[node]['vote'] = NODE_COLOR_GRAY
         else:
             # the nodes that will have vote black or white
             graph.nodes[node]['vote'] = NODE_COLOR_WHITE
-    while (num_red_c < num_red):
-        r_node = random.randint(0, graph.number_of_nodes() - 1)
-        if graph.nodes[r_node]['vote'] == NODE_COLOR_WHITE:
-            graph.nodes[r_node]['vote'] = NODE_COLOR_RED
-            # print("black node's degree: ", graph.degree(r_node))
-            num_red_c += 1
 
+    whitenodes = [node for node in graph.nodes if graph.nodes[node]['vote'] == NODE_COLOR_WHITE]
+    #print('whitenodes', whitenodes)
+    red_nodes = random.choices(whitenodes, k=num_red)
+    #print('red_nodes', red_nodes)
+    for rednode in red_nodes:
+        graph.nodes[rednode]['vote'] = NODE_COLOR_RED
     return graph
 
 
@@ -335,6 +337,105 @@ def moderatelyExpander(degree_of_each_supernode, number_of_supernodes, nodes_in_
     # nx.draw(G)
     # plt.savefig("filename.png")
     return G
+
+
+def Simulation_Charlotte(our_graph, type_graph, num_red, k, dict_args, dict_counter_measure):
+    stop = 0
+    phase = 0
+    n = our_graph.number_of_nodes()
+    count = 0
+
+    cur_num_red = num_red
+    cur_num_gray = 0
+    cur_num_white = our_graph.number_of_nodes() - num_red
+    list_num_gray = [cur_num_gray]
+    list_num_red = [cur_num_red]
+    list_num_white = [cur_num_white]
+
+    step = 1
+    while stop != 1:
+        phase = phase + 1
+        # print("phase", phase)
+        change = 0
+        for round in range(k + 1):
+            hit_nodes = set()
+            hit_nodes_list = []
+            for node in [node for node in our_graph.nodes if our_graph.nodes[node]['vote'] == NODE_COLOR_RED]:
+                our_graph.nodes[node]['stamp'] = our_graph.nodes[node]['stamp'] + 1
+                # the node has been black for k rounds and becomes gray
+                if our_graph.nodes[node]['stamp'] == k:
+                    our_graph.nodes[node]['vote'] = NODE_COLOR_GRAY
+                    cur_num_gray = cur_num_gray + 1
+                    cur_num_red = cur_num_red - 1
+                    change += 1
+                else:
+                    neighlist = list(our_graph.adj[node])
+                    # only consider the white neighbors these are the only ones that can be influenced
+                    for neigh in [neigh for neigh in neighlist if
+                                  our_graph.nodes[neigh]['vote'] == NODE_COLOR_WHITE]:
+                        # manually add the nodes to their own neighborhoods
+                        neighset = set(our_graph.adj[node])
+                        neighset.add(node)
+                        neighsetneigh = set(our_graph.adj[neigh])
+                        neighsetneigh.add(neigh)
+                        intersection_neigh = neighset.intersection(neighsetneigh)
+                        if len(intersection_neigh) > 1:
+                            our_graph.nodes[neigh]['triangle'] = 1
+                        union_neigh = neighset.union(neighsetneigh)
+                        jaccard_sim = Decimal(len(intersection_neigh) / len(union_neigh))
+                        count = count + 1
+                        denom = Decimal(2 ** (our_graph.nodes[node]['stamp']))
+                        r = (jaccard_sim / denom)
+                        rand = random.random()
+                        if rand < r:
+                            our_graph.nodes[neigh]['hit_counter'] += 1
+                            hit_nodes.add(neigh)
+            for node in hit_nodes:
+                if dict_counter_measure["id"] == COUNTER_MEASURE_NONE:
+                    our_graph.nodes[node]['vote'] = NODE_COLOR_RED
+                    change = change + 1
+                    cur_num_red = cur_num_red + 1
+                    cur_num_white = cur_num_white - 1
+                if dict_counter_measure['id'] == COUNTER_MEASURE_HEAR_FROM_AT_LEAST_TWO:
+                    if our_graph.nodes[node]['hit_counter'] >= 2:
+                        our_graph.nodes[node]['vote'] = NODE_COLOR_RED
+                        change = change + 1
+                        cur_num_red += 1
+                        cur_num_white -= 1
+                    else:
+                        our_graph.nodes[node]['vote'] = NODE_COLOR_WHITE
+                if dict_counter_measure['id'] == COUNTER_MEASURE_TRIANGLE:
+                    if our_graph.nodes[node]['triangle'] >= 1:
+                        our_graph.nodes[node]['vote'] = NODE_COLOR_RED
+                        change = change + 1
+                        cur_num_red += 1
+                        cur_num_white -= 1
+                    else:
+                        our_graph.nodes[node]['vote'] = NODE_COLOR_GRAY
+                        change = change + 1
+                        cur_num_gray += 1
+                        cur_num_white -= 1
+
+
+
+
+
+
+            # print("round", round, "phase", phase, cur_num_gray, cur_num_white, cur_num_red)
+            list_num_white.append(cur_num_white)
+            list_num_red.append(cur_num_red)
+            list_num_gray.append(cur_num_gray)
+            print("listnumwhite", list_num_white)
+            print("listnumblack", list_num_red)
+            print("listnumgray", list_num_gray)
+            step += 1
+        # print("change", change)
+        if change == 0:
+            stop = 1
+
+    # print("av jaccard", sum_jaccard_sim/count)
+
+    return list_num_gray, n
 
 
 def Simulation_no_countermeasure(graph, type_graph, num_red, k, dict_args):
