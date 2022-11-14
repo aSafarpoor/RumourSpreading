@@ -3,3 +3,4 @@
 .idea/*
 Results/*
 venv/*
+__pycache__
