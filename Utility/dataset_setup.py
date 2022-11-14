@@ -1,8 +1,35 @@
+"""
+These are the main datasets that we use to run out experiments.
+The data structure is a dictionary with the following fields:
+loc: a string value showing the location of the dataset
+directed: a boolean value which shows whether the dataset is directed or not
+type: an integer number representing the type of the graph
+"""
+# imports (START)
 import os
-abs_path = os.path.abspath(os.path.dirname(__file__))
 
-fb_loc_path = abs_path + "/Utility/Datasets/facebook_combined.txt"
-twitter_loc_path = abs_path + "/Utility/Datasets/twitter_combined"
-SD_loc_path = abs_path + "/Utility/Datasets/Slashdot0902.txt"
-SD_info_dir=True
-Pokec_loc_path = ""
+# imports (END)
+# Dataset type constants (START)
+TYPE_SOCIAL_NETWORK = 0
+TYPE_ERDOS_RENYI = 1
+TYPE_BA = 2
+TYPE_LFR = 3
+TYPE_HRG = 4
+TYPE_MODERATELY_EXPANDER = 5
+TYPE_D_REGULAR_RANDOM_GRAPH = 6
+TYPE_RING_OF_CLIQUES = 7
+TYPE_CYCLIC = 8
+TYPE_COMPLETE = 9
+# Dataset type constants (END)
+
+# Datasets (START)
+# Constant referring to the directory of the code (START)
+ABS_PATH = os.path.abspath(os.path.dirname(__file__))
+# Constant referring to the directory of the code (END)
+
+facebook = {"loc": ABS_PATH + "/Utility/Datasets/facebook_combined.txt", "directed": False, "type": TYPE_SOCIAL_NETWORK}
+twitter = {"loc": ABS_PATH + "/Utility/Datasets/twitter_combined", "directed": True, "type": TYPE_SOCIAL_NETWORK}
+slashdot = {"loc": ABS_PATH + "/Utility/Datasets/Slashdot0902.txt", "directed": True, "type": TYPE_SOCIAL_NETWORK}
+pokec = {"loc": ABS_PATH + "/Utility/Datasets/soc-pokec-relationships.txt", "directed": True,
+         "type": TYPE_SOCIAL_NETWORK}
+# Datasets (END)
