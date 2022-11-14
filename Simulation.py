@@ -26,7 +26,7 @@ COUNTER_MEASURE_DOUBT_SPREADING = 5
 # Constants showing the color of nodes (START)
 NODE_COLOR_RED = 1
 NODE_COLOR_WHITE = -1
-NODE_COLOR_GRAY = 0
+NODE_COLOR_ORANGE = 0
 NODE_COLOR_RESERVED = 2
 NODE_COLOR_GREEN = 3
 
@@ -35,11 +35,17 @@ NODE_COLOR_GREEN = 3
 
 
 # node colour IDs
-def ringOfCliques(j, c):
-    G = nx.ring_of_cliques(j, c)
+def ringOfCliques(num_cliques, clique_size):
+    """
+    This function returns a ring-of-cliques graph where:
+    num_cliques: the number of cliques
+    clique_size: the number of nodes in each clique
+    """
+    G = nx.ring_of_cliques(num_cliques, clique_size)
     return G
 
 
+# ???
 def KCliqueExpander(j, c, d):
     KC = ringOfCliques(j, c)
     # print("KCLIQUE", KC, KC.nodes())
@@ -53,16 +59,19 @@ def KCliqueExpander(j, c, d):
     return G
 
 
-def GetSNlikeGraph(graph, type_graph):
+def GetSNlikeGraph(realworld_graph, type_graph):
     # Generating the graph
-    temp_graph = nx.read_edgelist(os.path.join(abs_path, graph), create_using=nx.Graph(), nodetype=int)
+    temp_graph = nx.read_edgelist(realworld_graph["loc"], create_using=nx.Graph(), nodetype=int)
+    if (realworld_graph["directed"]):
+        temp_graph = temp_graph.to_undirected()  # Make directed graphs undirected
     mapping = dict(zip(temp_graph, range(0, temp_graph.number_of_nodes())))
     temp_graph = nx.relabel_nodes(temp_graph, mapping)
+    n = temp_graph.number_of_nodes()
     total = sum(j for i, j in list(temp_graph.degree(temp_graph.nodes)))
     av_deg = total / temp_graph.number_of_nodes()
-    print("av_deg", av_deg)
+    # print("av_deg", av_deg)
     p = total / (temp_graph.number_of_nodes() * (temp_graph.number_of_nodes() - 1))
-
+    d = round(n * p / 2) * 2
     degrees = {}
     for node in temp_graph.nodes():
         key = len(temp_graph.adj[node])
@@ -75,15 +84,13 @@ def GetSNlikeGraph(graph, type_graph):
         num_nodes.append(degrees.get(i, 0))
 
     fit = powerlaw.Fit(num_nodes)
-    print(fit.power_law.alpha)
+    # print(fit.power_law.alpha)
 
-    if type_graph == 'ER':
-        # print("ER graph")
+    if type_graph == TYPE_ERDOS_RENYI:
         our_graph = nx.fast_gnp_random_graph(n=temp_graph.number_of_nodes(), p=p)
-    elif type_graph == 'BA':
-        # print("BA graph")
+    elif type_graph == TYPE_BA:
         our_graph = nx.barabasi_albert_graph(n=temp_graph.number_of_nodes(), m=int(av_deg))
-    elif type_graph == "LFR":
+    elif type_graph == TYPE_LFR:
         dict_args = {"n": temp_graph.number_of_nodes(), "tau1": fit.power_law.alpha, "tau2": fit.power_law.alpha,
                      "mu": 0.4, "average_degree": av_deg, "min_degree": min_degree,
                      "min_community": math.sqrt(temp_graph.number_of_nodes()),
@@ -99,77 +106,85 @@ def GetSNlikeGraph(graph, type_graph):
         print("edges: " + str(our_graph.number_of_edges()))
 
 
-    elif type_graph == 'SN':
+    elif type_graph == TYPE_SOCIAL_NETWORK:
         our_graph = temp_graph
-    return our_graph
-
-
-def GetGraph(dict_args):
-    temp_graph = nx.read_edgelist(os.path.join(abs_path, graph), create_using=nx.Graph(), nodetype=int)
-    n = temp_graph.number_of_nodes()
-    mapping = dict(zip(temp_graph, range(0, temp_graph.number_of_nodes())))
-    temp_graph = nx.relabel_nodes(temp_graph, mapping)
-
-    total = sum(j for i, j in list(temp_graph.degree(temp_graph.nodes)))
-    av_deg = total / temp_graph.number_of_nodes()
-    # print("av_deg", av_deg)
-    p = total / (temp_graph.number_of_nodes() * (temp_graph.number_of_nodes() - 1))
-    d = round(n * p / 2) * 2
-
-    degrees = {}
-    for node in temp_graph.nodes():
-        key = len(temp_graph.adj[node])
-        degrees[key] = degrees.get(key, 0) + 1
-
-    max_degree = max(degrees.keys(), key=int)
-    min_degree = min(degrees.keys(), key=int)
-    num_nodes = []
-    for i in range(1, max_degree + 1):
-        num_nodes.append(degrees.get(i, 0))
-
-    # fit = powerlaw.Fit(num_nodes)
-    # print(fit.power_law.alpha)
-
-    if type_graph == 'ER':
-        # print("ER graph")
-        our_graph = nx.fast_gnp_random_graph(n=temp_graph.number_of_nodes(), p=p)
-    elif type_graph == 'BA':
-        # print("BA graph")
-        our_graph = nx.barabasi_albert_graph(n=temp_graph.number_of_nodes(), m=int(av_deg))
-    elif type_graph == "DREG":
+    elif type_graph == TYPE_D_REGULAR_RANDOM_GRAPH:
         our_graph = nx.random_regular_graph(d=d, n=n)
-    elif type_graph == "HRG":
+    elif type_graph == TYPE_HRG:
         hg = nk.generators.HyperbolicGenerator(n=temp_graph.number_of_nodes(), k=av_deg, gamma=2.5, T=0.6)
         hgG = hg.generate()
         our_graph = nk.nxadapter.nk2nx(hgG)
-
-
-    elif type_graph == 'SN':
-        our_graph = temp_graph
-
-
-
-
-    elif type_graph == "cycle":
+    elif type_graph == TYPE_CYCLIC:
         our_graph = nx.cycle_graph(n)
-    elif type_graph == "KClique":
+    elif type_graph == TYPE_RING_OF_CLIQUES:
+        our_graph = ringOfCliques(math.sqrt(n), math.sqrt(n))  # using just a rule of thumb and creating sqrt(n) cliques
+        # with sqrt(n) nodes in them.
+    # ???
+    # elif type_graph == "KCliqueExpander":
+    #     our_graph = KCliqueExpander(dict_args["num_cliques"], dict_args["clique_size"], d)
+    # ???
+    elif type_graph == TYPE_COMPLETE:
+        our_graph = nx.complete_graph(n)
+    elif type_graph == TYPE_MODERATELY_EXPANDER:
+        our_graph = moderatelyExpander(degree_of_each_supernode=math.log(n),
+                                       number_of_supernodes=math.sqrt(n),
+                                       nodes_in_clique=math.sqrt(n))  # using just a rule of thumb and creating sqrt(n)
+        # cliques with the degrees of log(n) and sqrt(n) nodes withing them.
+    return our_graph
+
+
+def getGraph(dict_args):
+    # n = temp_graph.number_of_nodes()
+    # mapping = dict(zip(temp_graph, range(0, temp_graph.number_of_nodes())))
+    # temp_graph = nx.relabel_nodes(temp_graph, mapping)
+
+    # total = sum(j for i, j in list(temp_graph.degree(temp_graph.nodes)))
+    # av_deg = total / temp_graph.number_of_nodes()
+    # print("av_deg", av_deg)
+    # p = total / (temp_graph.number_of_nodes() * (temp_graph.number_of_nodes() - 1))
+    # d = round(n * p / 2) * 2
+
+    # degrees = {}
+    # for node in temp_graph.nodes():
+    #     key = len(temp_graph.adj[node])
+    #     degrees[key] = degrees.get(key, 0) + 1
+    #
+    # max_degree = max(degrees.keys(), key=int)
+    # min_degree = min(degrees.keys(), key=int)
+    # num_nodes = []
+    # for i in range(1, max_degree + 1):
+    #     num_nodes.append(degrees.get(i, 0))
+
+    if dict_args["type"] == TYPE_ERDOS_RENYI:
+        our_graph = nx.fast_gnp_random_graph(n=dict_args["n"], p=dict_args["p"])
+    elif dict_args["type"] == TYPE_BA:
+        our_graph = nx.barabasi_albert_graph(n=dict_args["n"], m=dict_args["m"])
+    elif dict_args["type"] == TYPE_D_REGULAR_RANDOM_GRAPH:
+        our_graph = nx.random_regular_graph(d=dict_args["d"], n=dict_args["n"])
+    elif dict_args["type"] == TYPE_HRG:
+        hg = nk.generators.HyperbolicGenerator(n=dict_args["n"], k=dict_args["avg_degree"], gamma=2.5, T=0.6)
+        hgG = hg.generate()
+        our_graph = nk.nxadapter.nk2nx(hgG)
+    elif dict_args["type"] == TYPE_SOCIAL_NETWORK:
+        our_graph = nx.read_edgelist(dict_args["loc"], create_using=nx.Graph(), nodetype=int)
+    elif dict_args["type"] == TYPE_CYCLIC:
+        our_graph = nx.cycle_graph(dict_args["n"])
+    elif dict_args["type"] == TYPE_RING_OF_CLIQUES:
         our_graph = ringOfCliques(dict_args["num_cliques"], dict_args["clique_size"])
-    elif type_graph == "KCliqueExpander":
-        our_graph = KCliqueExpander(dict_args["num_cliques"], dict_args["clique_size"], d)
-    elif type_graph == "Complete":
+    # elif type_graph == "KCliqueExpander":
+    #     our_graph = KCliqueExpander(dict_args["num_cliques"], dict_args["clique_size"], d)
+    elif dict_args["type"] == TYPE_COMPLETE:
         our_graph = nx.complete_graph(dict_args["n"])
-    elif type_graph == "moderatelyExpander":
+    elif dict_args["type"] == TYPE_MODERATELY_EXPANDER:
         our_graph = moderatelyExpander(degree_of_each_supernode=dict_args["degree_of_supernodes"],
                                        number_of_supernodes=dict_args["number_of_supernodes"],
                                        nodes_in_clique=dict_args["nodes_in_clique"])
-    # elif type_graph == "LFR":
-    # dict_args:
-
-    # our_graph = nx.LFR_benchmark_graph(n=dict_args["n"], tau1=dict_args["tau1"], tau2=dict_args["tau2"],
-    #                                    mu=dict_args["mu"], average_degree=dict_args["average_degree"],
-    #                                    min_community=dict_args["min_community"],
-    #                                    tol=dict_args["tol"], max_iters=dict_args["max_iters"],
-    #                                    seed=dict_args["seed"])
+    elif dict_args["type"] == TYPE_LFR:
+        our_graph = nx.LFR_benchmark_graph(n=dict_args["n"], tau1=dict_args["tau1"], tau2=dict_args["tau2"],
+                                        mu=dict_args["mu"], average_degree=dict_args["average_degree"],
+                                        min_community=dict_args["min_community"],
+                                        tol=dict_args["tol"], max_iters=dict_args["max_iters"],
+                                        seed=dict_args["seed"])
     # print("edges: " + str(our_graph.number_of_edges()))
     # print("nodes: " + str(len(our_graph.nodes())))
     # print("is_connected: " + str(nx.is_connected(our_graph)))
@@ -180,8 +195,9 @@ def GetGraph(dict_args):
     return our_graph
 
 
+# Just a backup of out previous function
 def GetGraph_backup(graph, type_graph, dict_args):
-    temp_graph = nx.read_edgelist(os.path.join(abs_path, graph), create_using=nx.Graph(), nodetype=int)
+    temp_graph = nx.read_edgelist(os.path.join(ABS_PATH, graph), create_using=nx.Graph(), nodetype=int)
     n = temp_graph.number_of_nodes()
     mapping = dict(zip(temp_graph, range(0, temp_graph.number_of_nodes())))
     temp_graph = nx.relabel_nodes(temp_graph, mapping)
@@ -272,7 +288,7 @@ def GetGraph_backup(graph, type_graph, dict_args):
 
     return our_graph
 
-
+# I stopped here
 def GetInitialOpinions(graph, num_red, gray_p):
     num_red_c = 0
     for node in graph.nodes:
@@ -280,7 +296,7 @@ def GetInitialOpinions(graph, num_red, gray_p):
         graph.nodes[node]['sleep_timer'] = 0
         if (random.random() < gray_p):
             # these are the nodes that will have vote gray and thus are not affected by the neighbours
-            graph.nodes[node]['vote'] = NODE_COLOR_GRAY
+            graph.nodes[node]['vote'] = NODE_COLOR_ORANGE
         else:
             # the nodes that will have vote black or white
             graph.nodes[node]['vote'] = NODE_COLOR_WHITE
@@ -322,7 +338,7 @@ def moderatelyExpander(degree_of_each_supernode, number_of_supernodes, nodes_in_
 
 
 def Simulation_no_countermeasure(graph, type_graph, num_red, k, dict_args):
-    our_graph = GetGraph(graph=graph, type_graph=type_graph, dict_args=dict_args)
+    our_graph = getGraph(graph=graph, type_graph=type_graph, dict_args=dict_args)
     our_graph = GetInitialOpinions(graph=our_graph, num_red=num_red, gray_p=0)
     stop = 0
     phase = 0
@@ -350,7 +366,7 @@ def Simulation_no_countermeasure(graph, type_graph, num_red, k, dict_args):
                 our_graph.nodes[node]['stamp'] = our_graph.nodes[node]['stamp'] + 1
                 # the node has been black for k rounds and becomes gray
                 if our_graph.nodes[node]['stamp'] == k:
-                    our_graph.nodes[node]['vote'] = NODE_COLOR_GRAY
+                    our_graph.nodes[node]['vote'] = NODE_COLOR_ORANGE
                     cur_num_gray = cur_num_gray + 1
                     cur_num_red = cur_num_red - 1
                 else:
@@ -388,7 +404,7 @@ def Simulation_no_countermeasure(graph, type_graph, num_red, k, dict_args):
     return list_num_gray, n
 
 
-def simulation(realworld_graph=None, num_red=1,num_orange=0, k=5,dict_args={"type": TYPE_ERDOS_RENYI, "n": 200},
+def simulation(realworld_graph=None, num_red=1, num_orange=0, k=5, dict_args={"type": TYPE_ERDOS_RENYI, "n": 200},
                dict_counter_measure={"id": COUNTER_MEASURE_NONE}, seed=None):
     """
     This function is the implementation of the proposed model and counter measures. The followings describe each
@@ -400,9 +416,9 @@ def simulation(realworld_graph=None, num_red=1,num_orange=0, k=5,dict_args={"typ
     num_red: number of red colored nodes in the first epoch of the simulation.
     num_orange: number of orange colored nodes in the first epoch of the simulation.
     k: the number of epoches that takes until a red node turns orange.
-    dict_args: a dictionary of the parameters to be used for creating a synthetic network (explained in `main.py`). If both this parameter and
-               `realworld_graph` are set, the simulation will run on a synthetic network with characteristics similar
-               to the given realworld_graph.
+    dict_args: a dictionary of the parameters to be used for creating a synthetic network (explained in `main.py`).
+                If both this parameter and `realworld_graph` are set, the simulation will run on a synthetic network
+                with characteristics similar to the given realworld_graph.
     dict_counter_measure: a dictionary of the parameters to be used for running the counter measure.
     seed: The seed value for creating pseudo-random numbers in the process.
     """
@@ -411,7 +427,14 @@ def simulation(realworld_graph=None, num_red=1,num_orange=0, k=5,dict_args={"typ
     # setting random seed value (END)
 
     # Generating the graph (START)
-    our_graph = GetGraph(dict_args=dict_args)
+    if (realworld_graph != None and dict_args != None):
+        pass
+    # create synthetic graphs similar to the real world graph
+    elif (realworld_graph == None and dict_args != None):
+        pass
+    elif (realworld_graph != None and dict_args == None):
+        pass
+    our_graph = getGraph(dict_args=dict_args)
     # Generating the graph (START)
 
     # generate the initial opinions of the graph
@@ -433,7 +456,7 @@ def simulation(realworld_graph=None, num_red=1,num_orange=0, k=5,dict_args={"typ
     rednodes_initial = [node for node in our_graph.nodes if our_graph.nodes[node]['vote'] == NODE_COLOR_RED]
     cur_num_red = len(rednodes_initial)
 
-    gray_nodes_initial = [node for node in our_graph.nodes if our_graph.nodes[node]['vote'] == NODE_COLOR_GRAY]
+    gray_nodes_initial = [node for node in our_graph.nodes if our_graph.nodes[node]['vote'] == NODE_COLOR_ORANGE]
     cur_num_gray = len(gray_nodes_initial)
 
     whitenodes_initial = [node for node in our_graph.nodes if our_graph.nodes[node]['vote'] == NODE_COLOR_WHITE]
@@ -503,7 +526,7 @@ def simulation(realworld_graph=None, num_red=1,num_orange=0, k=5,dict_args={"typ
                     # the node has been black for k rounds and becomes gray
                     if our_graph.nodes[node]['stamp'] == k:
                         # print("becoming gray", node)
-                        our_graph.nodes[node]['vote'] = NODE_COLOR_GRAY
+                        our_graph.nodes[node]['vote'] = NODE_COLOR_ORANGE
                         cur_num_gray = cur_num_gray + 1
                         cur_num_red = cur_num_red - 1
                     else:
@@ -544,7 +567,7 @@ def simulation(realworld_graph=None, num_red=1,num_orange=0, k=5,dict_args={"typ
                             our_graph.nodes[node]['stamp'] = our_graph.nodes[node]['stamp'] + 1
                             # **
                             if our_graph.nodes[node]['stamp'] == k:
-                                our_graph.nodes[node]['vote'] = NODE_COLOR_GRAY
+                                our_graph.nodes[node]['vote'] = NODE_COLOR_ORANGE
                                 cur_num_gray = cur_num_gray + 1
                                 cur_num_green = cur_num_green - 1
                             else:
@@ -580,7 +603,7 @@ def simulation(realworld_graph=None, num_red=1,num_orange=0, k=5,dict_args={"typ
                         # the node has been black for k rounds and becomes gray
                         if our_graph.nodes[node]['stamp'] == k:
                             # print("becoming gray", node)
-                            our_graph.nodes[node]['vote'] = NODE_COLOR_GRAY
+                            our_graph.nodes[node]['vote'] = NODE_COLOR_ORANGE
                             cur_num_gray = cur_num_gray + 1
                             cur_num_red = cur_num_red - 1
                         else:
@@ -619,7 +642,7 @@ def simulation(realworld_graph=None, num_red=1,num_orange=0, k=5,dict_args={"typ
                     # the node has been black for k rounds and becomes gray
                     if our_graph.nodes[node]['stamp'] == k:
                         # print("becoming gray", node)
-                        our_graph.nodes[node]['vote'] = NODE_COLOR_GRAY
+                        our_graph.nodes[node]['vote'] = NODE_COLOR_ORANGE
                         cur_num_gray = cur_num_gray + 1
                         cur_num_RED = cur_num_red - 1
                     else:
@@ -666,7 +689,7 @@ def simulation(realworld_graph=None, num_red=1,num_orange=0, k=5,dict_args={"typ
                     # the node has been black for k rounds and becomes gray
                     if our_graph.nodes[node]['stamp'] == k:
                         # print("becoming gray", node)
-                        our_graph.nodes[node]['vote'] = NODE_COLOR_GRAY
+                        our_graph.nodes[node]['vote'] = NODE_COLOR_ORANGE
                         cur_num_gray = cur_num_gray + 1
                         cur_num_red = cur_num_red - 1
                     else:
@@ -719,7 +742,7 @@ def simulation(realworld_graph=None, num_red=1,num_orange=0, k=5,dict_args={"typ
                     # the node has been black for k rounds and becomes gray
                     if our_graph.nodes[node]['stamp'] == k:
                         # print("becoming gray", node)
-                        our_graph.nodes[node]['vote'] = NODE_COLOR_GRAY
+                        our_graph.nodes[node]['vote'] = NODE_COLOR_ORANGE
                         cur_num_gray = cur_num_gray + 1
                         cur_num_red = cur_num_red - 1
                     else:
@@ -763,7 +786,7 @@ def simulation(realworld_graph=None, num_red=1,num_orange=0, k=5,dict_args={"typ
                     # the node has been black for k rounds and becomes gray
                     if our_graph.nodes[node]['stamp'] == k:
                         # print("becoming gray", node)
-                        our_graph.nodes[node]['vote'] = NODE_COLOR_GRAY
+                        our_graph.nodes[node]['vote'] = NODE_COLOR_ORANGE
                         cur_num_gray = cur_num_gray + 1
                         cur_num_red = cur_num_red - 1
                     else:
@@ -821,7 +844,7 @@ def simulation(realworld_graph=None, num_red=1,num_orange=0, k=5,dict_args={"typ
                 print("Updating doubt values")
                 while (len(doubt_spreader) > 0):
                     d_node = doubt_spreader.pop()
-                    if our_graph.nodes[d_node]["vote"] == NODE_COLOR_GRAY:
+                    if our_graph.nodes[d_node]["vote"] == NODE_COLOR_ORANGE:
                         continue
                     (d, delta) = our_graph.nodes[d_node]['origin'][-1]
                     for neigh in our_graph.neighbors(d_node):

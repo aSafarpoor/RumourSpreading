@@ -97,7 +97,7 @@ if __name__ == "__main__":
     """
 
     # dataset args (START)
-    dict_args_ER_2000 = {"type": TYPE_ERDOS_RENYI, "n": 2000}
+    dict_args_ER_2000 = {"type": TYPE_ERDOS_RENYI, "n": 2000, "p": 0.1}
     dict_args_BA_2000_300 = {"type": TYPE_BA, "n": 2000, "m": 300}
     dict_args_DREG_2000_50 = {"type": TYPE_D_REGULAR_RANDOM_GRAPH, "n": 2000, "d": 50}
     dict_args_HRG_2000_10 = {"type": TYPE_HRG, "n": 2000, "avg_degree": 10}
@@ -160,7 +160,7 @@ if __name__ == "__main__":
                                                 "threshold_block": 0.1}
 
     dict_counter_measure_doubt_spreading = {"id": COUNTER_MEASURE_DOUBT_SPREADING, "negative_doubt_shift": -0.6,
-                            "positive_doubt_shift": 0.1}
+                                            "positive_doubt_shift": 0.1}
     # counter measure args (END)
 
     # running the simulation (START)
@@ -168,7 +168,6 @@ if __name__ == "__main__":
         simulation(realworld_graph=None, num_red=1, num_orange=0,
                    k=5, dict_args=dict_args_ER_2000, dict_counter_measure=
                    dict_counter_measure_community_Detection, seed=9)
-
 
     # running the simulation (END)
 
