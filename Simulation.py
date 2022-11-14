@@ -340,6 +340,7 @@ def moderatelyExpander(degree_of_each_supernode, number_of_supernodes, nodes_in_
 
 
 def Simulation_Charlotte(our_graph, type_graph, num_red, k, dict_args, dict_counter_measure):
+     our_graph = GetInitialOpinions(graph=our_graph, num_red=num_red, gray_p=0)
     stop = 0
     phase = 0
     n = our_graph.number_of_nodes()
