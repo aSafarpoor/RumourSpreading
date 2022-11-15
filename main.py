@@ -10,7 +10,7 @@ from Simulation import *
 from averaging import averaging
 from Utility.dataset_setup import facebook, twitter, slashdot, pokec
 from Utility.dataset_setup import *
-from IMP.averaging import *
+from averaging import *
 
 # imports (END)
 if __name__ == "__main__":
@@ -169,7 +169,7 @@ if __name__ == "__main__":
 
     # running the simulation (START)
     [list_num_white, list_num_black, list_num_gray, list_num_green] = \
-        simulation(realworld_graph=None, num_red=1, num_orange=0,
+        simulation(realworld_graph=None, num_red=1, orange_p=0,
                    k=5, dict_args=dict_args_ER_2000, dict_counter_measure=
                    dict_counter_measure_community_Detection, seed=9)
 
