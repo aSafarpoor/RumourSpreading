@@ -24,12 +24,15 @@ TYPE_COMPLETE = 9
 
 # Datasets (START)
 # Constant referring to the directory of the code (START)
-ABS_PATH = os.path.abspath(os.path.dirname(__file__))
+ABS_PATH_UTILITY = os.path.abspath(os.path.dirname(__file__))
 # Constant referring to the directory of the code (END)
 
-facebook = {"loc": ABS_PATH + "/Utility/Datasets/facebook_combined.txt", "directed": False, "type": TYPE_SOCIAL_NETWORK}
-twitter = {"loc": ABS_PATH + "/Utility/Datasets/twitter_combined", "directed": True, "type": TYPE_SOCIAL_NETWORK}
-slashdot = {"loc": ABS_PATH + "/Utility/Datasets/Slashdot0902.txt", "directed": True, "type": TYPE_SOCIAL_NETWORK}
-pokec = {"loc": ABS_PATH + "/Utility/Datasets/soc-pokec-relationships.txt", "directed": True,
+facebook = {"loc": ABS_PATH_UTILITY + "/Datasets/facebook_combined.txt", "name": "facebook", "directed": False,
+            "type": TYPE_SOCIAL_NETWORK}
+twitter = {"loc": ABS_PATH_UTILITY + "/Datasets/twitter_combined", "name": "twitter", "directed": True,
+           "type": TYPE_SOCIAL_NETWORK}
+slashdot = {"loc": ABS_PATH_UTILITY + "/Datasets/Slashdot0902.txt", "name": "slashdot", "directed": True,
+            "type": TYPE_SOCIAL_NETWORK}
+pokec = {"loc": ABS_PATH_UTILITY + "/Datasets/soc-pokec-relationships.txt", "name": "Pokec", "directed": True,
          "type": TYPE_SOCIAL_NETWORK}
 # Datasets (END)

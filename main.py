@@ -7,21 +7,18 @@ import sys
 import os
 import matplotlib.pyplot as plt
 from Simulation import *
-from averaging import averaging
 from Utility.dataset_setup import facebook, twitter, slashdot, pokec
-from Utility.dataset_setup import *
-from averaging import *
+# from averaging import averaging
+# from averaging import *
 
 # imports (END)
+
+
+# Constant referring to the directory of the code (START)
+ABS_PATH = os.path.abspath(os.path.dirname(__file__))
+# Constant referring to the directory of the code (END)
+
 if __name__ == "__main__":
-    dict_counter_measure = {'id': COUNTER_MEASURE_NONE}
-    dict_args = {"degree_of_supernodes": 50, "number_of_supernodes": 1000, "nodes_in_clique": 16}
-
-
-
-    list_gray = BigSimulation(num_runs=10, graph_loc=fb_loc, type_graph="moderatelyExpander", num_red=1, k=5, dict_args=dict_args,dict_counter_measure=dict_counter_measure)
-    
-
     """
     To run experiments on graphs, we use dictionaries like `dict_args_ER_2000`.
     Every graph dictionary has a `type` field which is set based on the rules of dataset types explained in 
@@ -123,11 +120,14 @@ if __name__ == "__main__":
     type: indicates the type of the counter measure (none)
 
     - Sample experiment setup with green information spreading counter measure:
-    dict_counter_measure_green_information = {"type": COUNTER_MEASURE_GREEN_INFORMATION, "start_time": 5, "num_green": 50}
+    dict_counter_measure_green_information = {"type": COUNTER_MEASURE_GREEN_INFORMATION, "start_time": 5,
+                                              "num_green": 1,"green_spreading_ratio":0.5,
+                                              "high_degree_selection_strategy": False}
     type: indicates the type of the counter measure (green information)
     start_time: the time slot when the green information spreading process starts
     num_green: the number of green nodes in the first round of the counter measure
-    
+    green_spreading_ratio: people are less interested in authorized news, so we add another random selection
+    high_degree_selection_strategy: True for selecting high degree nodes and False for random selection strategy
     - Sample experiment setup with hearing from at least neighbor counter measure:
     dict_counter_measure_hear_from_two = {"type": COUNTER_MEASURE_HEAR_FROM_AT_LEAST_TWO}
     type: indicates the type of the counter measure (hearing from at least two)
@@ -156,8 +156,9 @@ if __name__ == "__main__":
 
     # counter measure args (START)
     dict_counter_measure_none = {"type": COUNTER_MEASURE_NONE}
-    dict_counter_measure_green_information = {"type": COUNTER_MEASURE_GREEN_INFORMATION, "start_time": 5,
-                                              "num_green": 50}
+    dict_counter_measure_green_information = {"type": COUNTER_MEASURE_GREEN_INFORMATION, "start_time": 1,
+                                              "num_green": 1,"green_spreading_ratio":0.5,
+                                              "high_degree_selection_strategy": True}
     dict_counter_measure_hear_from_two = {"type": COUNTER_MEASURE_HEAR_FROM_AT_LEAST_TWO}
     dict_counter_measure_delayed_spreading = {"type": COUNTER_MEASURE_DELAYED_SPREADING, "sleep_timer": 2}
     dict_counter_measure_community_Detection = {"type": COUNTER_MEASURE_COMMUNITY_DETECTION, "threshold_detection": 0.1,
@@ -168,25 +169,27 @@ if __name__ == "__main__":
     # counter measure args (END)
 
     # running the simulation (START)
-    [list_num_white, list_num_black, list_num_gray, list_num_green] = \
-        simulation(realworld_graph=None, num_red=1, orange_p=0,
-                   k=5, dict_args=dict_args_ER_2000, dict_counter_measure=
-                   dict_counter_measure_community_Detection, seed=9)
+    [list_num_white, list_num_red, list_num_orange, list_num_green] = \
+        simulation(realworld_graph=facebook, num_red=1, orange_p=0,
+                   k=5, dict_args=None, dict_counter_measure=
+                   dict_counter_measure_green_information, seed=9)
 
     # running the simulation (END)
-
     # plotting and saving the results (START)
-    with open("output.txt", "a") as f:
+    with open("Output/output.txt", "a") as f:
         f.write("list_num_white = " + repr(list_num_white) + "\n")
-        f.write("list_num_black = " + repr(list_num_black) + "\n")
-        f.write("list_num_gray = " + repr(list_num_gray) + "\n")
+        f.write("list_num_black = " + repr(list_num_red) + "\n")
+        f.write("list_num_gray = " + repr(list_num_orange) + "\n")
         f.write("list_num_green = " + repr(list_num_green) + "\n")
         f.write("------------------------------------------- \n")
-    # plt.clf()
-    # plt.plot(list_num_white, "blue", label="white")
-    # plt.plot(list_num_black, "black", label="black")
-    # plt.plot(list_num_gray, "gray", label="gray")
-    # plt.plot(list_num_green, "green", label="green")
-    # plt.legend()
-    # plt.show()
+
+    plt.clf()
+    plt.xlabel("rounds", fontdict=None, labelpad=None)
+    plt.ylabel("the fraction of orange nodes", fontdict=None, labelpad=None)
+    plt.plot(list_num_white, "blue", label="white")
+    plt.plot(list_num_red, "red", label="red")
+    plt.plot(list_num_orange, "orange", label="Orange nodes in "+facebook["name"])
+    plt.plot(list_num_green, "green", label="green")
+    plt.legend()
+    plt.show()
     # plotting and saving the results (END)
