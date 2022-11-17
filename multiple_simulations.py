@@ -24,47 +24,47 @@ if __name__ == "__main__":
     To run experiments on graphs, we use dictionaries like `dict_args_ER_2000`.
     Every graph dictionary has a `type` field which is set based on the rules of dataset types explained in 
     `dataset_setup.py`. The other fields used in these dictionaries can differ based on the type of the graph.
-    
+
     - Example ER graph:
     dict_args_ER_2000 = {"type":TYPE_ERDOS_RENYI,"n": 2000}
     type: indicates the type of the graph (Erdos-Renyi)
     n:  indicates the number of nodes
-    
+
     - Example BA graph
     dict_args_BA_2000_300 = {"type":TYPE_BA,"n": 2000,"m":300}
     type: indicates the type of the graph (Barabási–Albert preferential attachment)
     n:  indicates the number of nodes
     m: indicates the number of edges that are preferentially attached to existing nodes with high degree
-    
+
     - Example D-regular graph
     dict_args_DREG_2000_50 = {"type": TYPE_D_REGULAR_RANDOM_GRAPH, "n": 2000, "d": 50}
     type: indicates the type of the graph (D-regular random graph)
     n:  indicates the number of nodes
     d: the degree of each node
-    
+
     - Example Hyperbolic Random Graph
     dict_args_HRG_2000_10 = {"type": TYPE_HRG, "n": 2000, "avg_degree": 10}
     type: indicates the type of the graph (Hyperbolic random graph)
     n: the number of nodes
     avg_degree: average degree
-    
+
     - Example Cyclic graph
     dict_args_CYCLE_2000 = {"type": TYPE_CYCLIC, "n": 2000}
     type: indicates the type of the graph (cyclic graph)
     n: the number of nodes
-     
-     
+
+
     - Example ring of cliques
     dict_args_TYPE_RING_OF_CLIQUES_1000_16 = {"type": TYPE_RING_OF_CLIQUES,"num_cliques":1000, "clique_size": 16}
     type: indicates the type of the graph (ring of cliques graph)
     num_cliques: the number of cliques
     clique_size: the number of nodes in each clique
-    
+
     - Example Complete graph
     dict_args_TYPE_COMPLETE_1000 = {"type": TYPE_COMPLETE,"n":1000}
     type: indicates the type of the graph (complete graph)
     n: the number of nodes
-    
+
     - Example Moderately expander graph
     dict_args_TYPE_MODERATELY_EXPANDER_1000_50_16 = {"type": TYPE_MODERATELY_EXPANDER, "number_of_supernodes": 1000,
                                                      "degree_of_supernodes": 50, "nodes_in_clique": 16}
@@ -72,7 +72,7 @@ if __name__ == "__main__":
     number_of_supernodes: the number of supernodes in the graph
     degree_of_supernodes: the degree of each supernode
     nodes_in_supernodes: the number of nodes within each supernode
-    
+
     - Example LFR graph
     dict_args_LFR = {"type":TYPE_LFR,"n": 1500, "tau1": 3, "tau2": 3, "mu": 0.4, "average_degree": 50,
                  "min_community": 200, "tol": 0.1, "max_iters": 1000, "seed": 7}
@@ -115,7 +115,7 @@ if __name__ == "__main__":
     To run different counter measures, we define counter measure parameters in a dictionary. 
     Every counter measure dictionary has a `type` field which shows the type of the counter measure. 
     The other fields used in these dictionaries can differ based on the type of the counter measure.
-    
+
     - Sample experiment setup without any counter measures:
     dict_counter_measure = {"type": COUNTER_MEASURE_NONE}
     type: indicates the type of the counter measure (none)
@@ -132,65 +132,133 @@ if __name__ == "__main__":
     - Sample experiment setup with hearing from at least neighbor counter measure:
     dict_counter_measure_hear_from_two = {"type": COUNTER_MEASURE_HEAR_FROM_AT_LEAST_TWO}
     type: indicates the type of the counter measure (hearing from at least two)
-    
+
     - Sample experiment setup with delayed rumor spreading counter measure:
     dict_counter_measure_delayed_spreading = {"type": COUNTER_MEASURE_DELAYED_SPREADING, "sleep_timer": 2}
     type: indicates the type of the counter measure (delayed spreading)
     sleep_timer: the length of the time slot that each node waits before spreading the rumor
-    
+
     - Sample experiment setup with community detection counter measure:
     dict_counter_measure_community_Detection = {"id": COUNTER_MEASURE_COMMUNITY_DETECTION, "threshold_detection": 0.1,
                             "threshold_block": 0.1}
     type: indicates the type of the counter measure (community detection)
     threshold_detection: the ratio of the all nodes which have to turn red for the counter measure to get activated;
     threshold_block: the ratio of the nodes in a community which have to turn red for the community to get blocked.
-    
+
     - Sample experiment setup with community detection counter measure:
     dict_counter_measure_community_Detection = {"type": COUNTER_MEASURE_COMMUNITY_DETECTION, "threshold_detection": 0.1,
                             "threshold_block": 0.1}
     type: indicates the type of the counter measure (community detection)
     threshold_detection: the ratio of the all nodes which have to turn red for the counter measure to get activated;
     threshold_block: the ratio of the nodes in a community which have to turn red for the community to get blocked.
-    
-    
+
+
     """
 
     # counter measure args (START)
     dict_counter_measure_none = {"type": COUNTER_MEASURE_NONE}
-    dict_counter_measure_green_information = {"type": COUNTER_MEASURE_GREEN_INFORMATION, "start_time": 8,
+    dict_counter_measure_green_information = {"type": COUNTER_MEASURE_GREEN_INFORMATION, "start_time": 1,
                                               "num_green": 1, "green_spreading_ratio": 0.5,
                                               "high_degree_selection_strategy": True}
     dict_counter_measure_hear_from_two = {"type": COUNTER_MEASURE_HEAR_FROM_AT_LEAST_TWO}
     dict_counter_measure_delayed_spreading = {"type": COUNTER_MEASURE_DELAYED_SPREADING, "sleep_timer": 2}
-    dict_counter_measure_community_Detection = {"type": COUNTER_MEASURE_COMMUNITY_DETECTION, "threshold_detection": 0.1,
-                                                "threshold_block": 0.1}
+    dict_counter_measure_community_detection = {"type": COUNTER_MEASURE_COMMUNITY_DETECTION,
+                                                "threshold_detection": 0.01,
+                                                "threshold_block": 0.05}
 
     dict_counter_measure_doubt_spreading = {"id": COUNTER_MEASURE_DOUBT_SPREADING, "negative_doubt_shift": -0.6,
                                             "positive_doubt_shift": 0.1}
     # counter measure args (END)
 
     # running the simulation (START)
-    [list_num_white, list_num_red, list_num_orange, list_num_green] = \
-        simulation(realworld_graph=facebook, num_red=1, orange_p=0,
-                   k=5, dict_args=None, dict_counter_measure=
-                   dict_counter_measure_green_information, seed=9)
+    avgs = dict()
+    for z in range(1, 6):
+        avg_list_num_white = [0]
+        avg_list_num_red = [0]
+        avg_list_num_orange = [0]
+        avg_list_num_green = [0]
 
+        for t in range(1, 7):
+            dict_counter_measure_green_information["start_time"] = 2 ** z
+            dict_counter_measure_community_detection["threshold_detection"] = float(z / 100)
+            [list_num_white, list_num_red, list_num_orange, list_num_green] = \
+                simulation(realworld_graph=twitter, num_red=1, orange_p=0,
+                           k=5, dict_args=None, dict_counter_measure=
+                           dict_counter_measure_community_detection, seed=9)
+
+            with open("Output/output-threshold_detection = " +
+                      str(dict_counter_measure_community_detection["threshold_detection"]) + ".txt", "a") as f:
+                f.write("list_num_white = " + repr(list_num_white) + "\n")
+                f.write("list_num_red = " + repr(list_num_red) + "\n")
+                f.write("list_num_orange = " + repr(list_num_orange) + "\n")
+                f.write("list_num_green = " + repr(list_num_green) + "\n")
+                f.write("------------------------------------------- \n")
+
+            if len(avg_list_num_white) <= len(list_num_white):
+                avg_list_num_white.extend([0] * (abs(len(avg_list_num_white) - len(list_num_white))))
+            else:
+                list_num_white.extend([list_num_white[-1]] * (abs(len(avg_list_num_white) - len(list_num_white))))
+
+            if len(avg_list_num_red) <= len(list_num_red):
+                avg_list_num_red.extend([0] * (abs(len(avg_list_num_red) - len(list_num_red))))
+            else:
+                list_num_red.extend([list_num_red[-1]] * (abs(len(avg_list_num_white) - len(list_num_red))))
+
+            if len(avg_list_num_orange) <= len(list_num_orange):
+                avg_list_num_orange.extend([0] * (abs(len(avg_list_num_orange) - len(list_num_orange))))
+            else:
+                list_num_orange.extend([list_num_orange[-1]] * (abs(len(avg_list_num_white) - len(list_num_orange))))
+
+            if len(avg_list_num_green) <= len(list_num_green):
+                avg_list_num_green.extend([0] * (abs(len(avg_list_num_green) - len(list_num_green))))
+            else:
+                list_num_green.extend([list_num_green[-1]] * (abs(len(avg_list_num_white) - len(list_num_green))))
+
+            avg_list_num_white = [sum(i) for i in zip(avg_list_num_white, list_num_white)]
+            avg_list_num_red = [sum(i) for i in zip(avg_list_num_red, list_num_red)]
+            avg_list_num_orange = [sum(i) for i in zip(avg_list_num_orange, list_num_orange)]
+            avg_list_num_green = [sum(i) for i in zip(avg_list_num_green, list_num_green)]
+
+        avg_list_num_white = [i / 6 for i in avg_list_num_white]
+        avg_list_num_red = [i / 6 for i in avg_list_num_red]
+        avg_list_num_orange = [i / 6 for i in avg_list_num_orange]
+        avg_list_num_green = [i / 6 for i in avg_list_num_green]
+
+        with open("Output/output-threshold_detection = " +
+                  str(dict_counter_measure_community_detection["threshold_detection"]) + ".txt", "a") as f:
+            f.write("avg_list_num_white = " + repr(avg_list_num_white) + "\n")
+            f.write("avg_list_num_red = " + repr(avg_list_num_red) + "\n")
+            f.write("avg_list_num_orange = " + repr(avg_list_num_orange) + "\n")
+            f.write("avg_list_num_green = " + repr(avg_list_num_green) + "\n")
+            f.write("------------------------------------------- \n")
+        plt.clf()
+        plt.xlabel("rounds", fontdict=None, labelpad=None)
+        plt.ylabel("the fraction of orange nodes", fontdict=None, labelpad=None)
+        # plt.plot(list_num_white, "blue", label="white")
+        # plt.plot(list_num_red, "red", label="red")
+        plt.plot(avg_list_num_orange, "orange", label="orange nodes in " + twitter["name"])
+        plt.title("Average ratios of 6 experiment: \n " +
+                  "threshold_detection = " + str(dict_counter_measure_community_detection["threshold_detection"]))
+        # plt.plot(list_num_green, "green", label="green")
+        plt.legend()
+        plt.savefig("Output/output-threshold_detection = " +
+                    str(dict_counter_measure_community_detection["threshold_detection"]) + ".png")
+        plt.show(block=False)
+        plt.pause(1)
+        plt.close()
+        avgs[str(z)] = avg_list_num_orange
     # running the simulation (END)
-    # plotting and saving the results (START)
-    with open("Output/output.txt", "a") as f:
-        f.write("list_num_white = " + repr(list_num_white) + "\n")
-        f.write("list_num_black = " + repr(list_num_red) + "\n")
-        f.write("list_num_gray = " + repr(list_num_orange) + "\n")
-        f.write("list_num_green = " + repr(list_num_green) + "\n")
-        f.write("------------------------------------------- \n")
-
+    # plotting and saving the results (END)
     plt.clf()
+    for i in range(1, 6):
+        plt.plot(avgs[str(i)], label="orange nodes in " + twitter["name"] +
+                                     " / threshold_detection = " +
+                                     str(dict_counter_measure_community_detection["threshold_detection"]))
     plt.xlabel("rounds", fontdict=None, labelpad=None)
     plt.ylabel("the fraction of orange nodes", fontdict=None, labelpad=None)
-    # plt.plot(list_num_white, "blue", label="white")
-    # plt.plot(list_num_red, "red", label="red")
-    plt.plot(list_num_orange, "orange", label="Orange nodes in " + facebook["name"])
-    # plt.plot(list_num_green, "green", label="green")
+    plt.title("Comparison of averages")
     plt.legend()
-    plt.show()
-    # plotting and saving the results (END)
+    plt.savefig("Output/average comparisons.png")
+    plt.show(block=False)
+    plt.pause(1)
+    plt.close()
