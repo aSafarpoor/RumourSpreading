@@ -9,6 +9,7 @@ import networkx.algorithms.community as nx_comm
 import matplotlib.pyplot as plt
 import math
 from Utility.dataset_setup import *
+from pyvis.network import Network
 from statistics import mean
 import time
 
@@ -423,7 +424,7 @@ def moderatelyExpander(degree_of_each_supernode, number_of_supernodes, nodes_in_
 
 
 def simulation(realworld_graph=None, num_red=1, orange_p=0, k=5, dict_args={"type": TYPE_ERDOS_RENYI, "n": 200},
-               dict_counter_measure={"type": COUNTER_MEASURE_NONE}, seed=None):
+               dict_counter_measure={"type": COUNTER_MEASURE_NONE}, visualization=False, seed=None):
     """
     This function is the implementation of the proposed model and counter measures. The followings describe each
      parameter's use:
@@ -438,6 +439,7 @@ def simulation(realworld_graph=None, num_red=1, orange_p=0, k=5, dict_args={"typ
                 If both this parameter and `realworld_graph` are set, the simulation will run on a synthetic network
                 with characteristics similar to the given realworld_graph.
     dict_counter_measure: a dictionary of the parameters to be used for running the counter measure.
+    visualization: set this parameter to True to save .html and .png representations in output folder
     seed: The seed value for creating pseudo-random numbers in the process.
     """
     # setting random seed value (START)
@@ -644,7 +646,7 @@ def simulation(realworld_graph=None, num_red=1, orange_p=0, k=5, dict_args={"typ
                                             # print("change", change)
                     elif our_graph.nodes[node]["vote"] == NODE_COLOR_RED:
                         our_graph.nodes[node]['stamp'] = our_graph.nodes[node]['stamp'] + 1
-                        # the node has red black for k rounds and becomes orange
+                        # the node has red red for k rounds and becomes orange
                         if our_graph.nodes[node]['stamp'] == k:
                             our_graph.nodes[node]['vote'] = NODE_COLOR_ORANGE
                             current_num_orange = current_num_orange + 1
@@ -887,18 +889,33 @@ def simulation(realworld_graph=None, num_red=1, orange_p=0, k=5, dict_args={"typ
             list_num_red.append(current_num_red)
             list_num_orange.append(current_num_orange)
             list_num_green.append(current_num_green)
-            print("listnumwhite", list_num_white)
-            print("listnumblack", list_num_red)
-            print("listnumgray", list_num_orange)
+            print("list_num_white", list_num_white)
+            print("list_num_red", list_num_red)
+            print("list_num_gray", list_num_orange)
             print("list_num_green", list_num_green)
-            step += 1
+            if visualization:
+                net = Network()
+                for n in our_graph.nodes:
+                    if our_graph.nodes[node]['vote'] == NODE_COLOR_ORANGE:
+                        net.add_node(n_id=n, color="orange")
+                    elif our_graph.nodes[node]['vote'] == NODE_COLOR_WHITE:
+                        net.add_node(n_id=n, color="white")
+                    elif our_graph.nodes[node]['vote'] == NODE_COLOR_GREEN:
+                        net.add_node(n_id=n, color="green")
+                    elif our_graph.nodes[node]['vote'] == NODE_COLOR_RED:
+                        net.add_node(n_id=n, color="red")
+                    elif our_graph.nodes[node]['vote'] == NODE_COLOR_PALE_GREEN:
+                        net.add_node(n_id=n, color="#98FB98")
+                for e in our_graph.edges():
+                    net.add_edge(e[0], e[1])
+                net.show("Output/" + str(round) + ".html")
         print("change", change)
         if change == 0:
             stop = 1
     # Simulation loop (END)
-    for ind in range(0,len(list_num_orange)):
-        list_num_orange[ind]=list_num_orange[ind]/our_graph.number_of_nodes()
-        list_num_white[ind]=list_num_white[ind]/our_graph.number_of_nodes()
-        list_num_red[ind]=list_num_red[ind]/our_graph.number_of_nodes()
-        list_num_green[ind]=list_num_green[ind]/our_graph.number_of_nodes()
+    for ind in range(0, len(list_num_orange)):
+        list_num_orange[ind] = list_num_orange[ind] / our_graph.number_of_nodes()
+        list_num_white[ind] = list_num_white[ind] / our_graph.number_of_nodes()
+        list_num_red[ind] = list_num_red[ind] / our_graph.number_of_nodes()
+        list_num_green[ind] = list_num_green[ind] / our_graph.number_of_nodes()
     return [list_num_white, list_num_red, list_num_orange, list_num_green]
