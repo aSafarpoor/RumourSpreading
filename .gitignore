@@ -5,4 +5,4 @@ Results/*
 venv/*
 __pycache__
 Output
-multiple_simulations_community_detection.py
+./multiple_simulations_community_detection.py
