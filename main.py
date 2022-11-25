@@ -7,7 +7,7 @@ import sys
 import os
 import matplotlib.pyplot as plt
 from Simulation import *
-from Utility.dataset_setup import facebook, twitter, slashdot, pokec
+from Utility.dataset_setup import facebook, twitter, slashdot, pokec,eu_email
 
 # from averaging import averaging
 # from averaging import *
@@ -171,9 +171,9 @@ if __name__ == "__main__":
 
     # running the simulation (START)
     [list_num_white, list_num_red, list_num_orange, list_num_green] = \
-        simulation(realworld_graph=facebook, num_red=1, orange_p=0,
-                   k=5, dict_args=None, dict_counter_measure=
-                   dict_counter_measure_green_information, seed=9)
+        simulation(realworld_graph=eu_email, num_red=1, orange_p=0,
+                   k=5, visualization=False, dict_args=None, dict_counter_measure=
+                   dict_counter_measure_community_Detection, seed=9)
 
     # running the simulation (END)
     # plotting and saving the results (START)
@@ -189,7 +189,7 @@ if __name__ == "__main__":
     plt.ylabel("the fraction of orange nodes", fontdict=None, labelpad=None)
     # plt.plot(list_num_white, "blue", label="white")
     # plt.plot(list_num_red, "red", label="red")
-    plt.plot(list_num_orange, "orange", label="Orange nodes in " + facebook["name"])
+    plt.plot(list_num_orange, "orange", label="Orange nodes in " + eu_email["name"])
     # plt.plot(list_num_green, "green", label="green")
     plt.legend()
     plt.show()

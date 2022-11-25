@@ -33,6 +33,8 @@ twitter = {"loc": ABS_PATH_UTILITY + "/Datasets/twitter_combined", "name": "twit
            "type": TYPE_SOCIAL_NETWORK}
 slashdot = {"loc": ABS_PATH_UTILITY + "/Datasets/Slashdot0902.txt", "name": "slashdot", "directed": True,
             "type": TYPE_SOCIAL_NETWORK}
+eu_email = {"loc": ABS_PATH_UTILITY + "/Datasets/email-Eu-core.txt", "name": "eu_email", "directed": True,
+            "type": TYPE_SOCIAL_NETWORK}
 pokec = {"loc": ABS_PATH_UTILITY + "/Datasets/soc-pokec-relationships.txt", "name": "Pokec", "directed": True,
          "type": TYPE_SOCIAL_NETWORK}
 # Datasets (END)
