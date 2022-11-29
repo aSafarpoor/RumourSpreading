@@ -7,7 +7,7 @@ import sys
 import os
 import matplotlib.pyplot as plt
 from Simulation import *
-from Utility.dataset_setup import facebook, twitter, slashdot, pokec,eu_email
+from Utility.dataset_setup import facebook, twitter, slashdot, pokec, eu_email
 
 # from averaging import averaging
 # from averaging import *
@@ -157,7 +157,7 @@ if __name__ == "__main__":
 
     # counter measure args (START)
     dict_counter_measure_none = {"type": COUNTER_MEASURE_NONE}
-    dict_counter_measure_green_information = {"type": COUNTER_MEASURE_GREEN_INFORMATION, "start_time": 8,
+    dict_counter_measure_green_information = {"type": COUNTER_MEASURE_GREEN_INFORMATION, "start_time": 4,
                                               "num_green": 1, "green_spreading_ratio": 0.5,
                                               "high_degree_selection_strategy": True}
     dict_counter_measure_hear_from_two = {"type": COUNTER_MEASURE_HEAR_FROM_AT_LEAST_TWO}
@@ -165,15 +165,15 @@ if __name__ == "__main__":
     dict_counter_measure_community_Detection = {"type": COUNTER_MEASURE_COMMUNITY_DETECTION, "threshold_detection": 0.1,
                                                 "threshold_block": 0.1}
 
-    dict_counter_measure_doubt_spreading = {"id": COUNTER_MEASURE_DOUBT_SPREADING, "negative_doubt_shift": -0.6,
+    dict_counter_measure_doubt_spreading = {"type": COUNTER_MEASURE_DOUBT_SPREADING, "negative_doubt_shift": -0.6,
                                             "positive_doubt_shift": 0.1}
     # counter measure args (END)
 
     # running the simulation (START)
     [list_num_white, list_num_red, list_num_orange, list_num_green] = \
-        simulation(realworld_graph=eu_email, num_red=1, orange_p=0,
+        simulation(realworld_graph=facebook, num_red=1, orange_p=0,
                    k=5, visualization=False, dict_args=None, dict_counter_measure=
-                   dict_counter_measure_community_Detection, seed=9)
+                   dict_counter_measure_green_information, seed=9)
 
     # running the simulation (END)
     # plotting and saving the results (START)

@@ -351,7 +351,6 @@ def moderatelyExpander(degree_of_each_supernode, number_of_supernodes, nodes_in_
 #         if change == 0:
 #             stop = 1
 #
-#     # print("av jaccard", sum_jaccard_sim/count)
 #
 #     return list_num_gray, n
 
@@ -361,7 +360,6 @@ def moderatelyExpander(degree_of_each_supernode, number_of_supernodes, nodes_in_
 #     our_graph = GetInitialOpinions(graph=our_graph, num_red=num_red, orange_p=0)
 #     stop = 0
 #     phase = 0
-#     sum_jaccard_sim = 0
 #     count = 0
 #     n = our_graph.number_of_nodes()
 #
@@ -401,7 +399,6 @@ def moderatelyExpander(degree_of_each_supernode, number_of_supernodes, nodes_in_
 #                         intersection_neigh = neighset.intersection(neighsetneigh)
 #                         union_neigh = neighset.union(neighsetneigh)
 #                         jaccard_sim = Decimal(len(intersection_neigh) / len(union_neigh))
-#                         sum_jaccard_sim += jaccard_sim
 #                         count = count + 1
 #                         denom = Decimal(2 ** (our_graph.nodes[node]['stamp']))
 #                         r = (jaccard_sim / denom)
@@ -463,7 +460,6 @@ def simulation(realworld_graph=None, num_red=1, orange_p=0, k=5, dict_args={"typ
     stop = 0
     phase = 0
 
-    sum_jaccard_sim = 0
     count = 0
 
     # assigning initial values to the variables (START)
@@ -594,7 +590,6 @@ def simulation(realworld_graph=None, num_red=1, orange_p=0, k=5, dict_args={"typ
                             intersection_neigh = neighset.intersection(neighsetneigh)
                             union_neigh = neighset.union(neighsetneigh)
                             jaccard_sim = Decimal(len(intersection_neigh) / len(union_neigh))
-                            sum_jaccard_sim += jaccard_sim
                             count = count + 1
                             denom = Decimal(2 ** (our_graph.nodes[node]['stamp']))
                             r = (jaccard_sim / denom)
@@ -632,13 +627,11 @@ def simulation(realworld_graph=None, num_red=1, orange_p=0, k=5, dict_args={"typ
                                         intersection_neigh = neighset.intersection(neighsetneigh)
                                         union_neigh = neighset.union(neighsetneigh)
                                         jaccard_sim = Decimal(len(intersection_neigh) / len(union_neigh))
-                                        sum_jaccard_sim += jaccard_sim
                                         count = count + 1
                                         denom = Decimal(2 ** (our_graph.nodes[node]['stamp']))
-                                        r = (jaccard_sim / denom)
+                                        r = float(jaccard_sim / denom)*dict_counter_measure["green_spreading_ratio"]
                                         rand = random.random()
-                                        rand2 = random.random()
-                                        if rand < r and rand2 < dict_counter_measure["green_spreading_ratio"]:
+                                        if rand < r:
                                             our_graph.nodes[neigh]['vote'] = NODE_COLOR_GREEN
                                             change = change + 1
                                             current_num_green = current_num_green + 1
@@ -646,7 +639,7 @@ def simulation(realworld_graph=None, num_red=1, orange_p=0, k=5, dict_args={"typ
                                             # print("change", change)
                     elif our_graph.nodes[node]["vote"] == NODE_COLOR_RED:
                         our_graph.nodes[node]['stamp'] = our_graph.nodes[node]['stamp'] + 1
-                        # the node has red red for k rounds and becomes orange
+                        # the node has been red for k rounds and becomes orange
                         if our_graph.nodes[node]['stamp'] == k:
                             our_graph.nodes[node]['vote'] = NODE_COLOR_ORANGE
                             current_num_orange = current_num_orange + 1
@@ -664,7 +657,6 @@ def simulation(realworld_graph=None, num_red=1, orange_p=0, k=5, dict_args={"typ
                                     intersection_neigh = neighset.intersection(neighsetneigh)
                                     union_neigh = neighset.union(neighsetneigh)
                                     jaccard_sim = Decimal(len(intersection_neigh) / len(union_neigh))
-                                    sum_jaccard_sim += jaccard_sim
                                     count = count + 1
                                     denom = Decimal(2 ** (our_graph.nodes[node]['stamp']))
                                     r = (jaccard_sim / denom)
@@ -698,7 +690,6 @@ def simulation(realworld_graph=None, num_red=1, orange_p=0, k=5, dict_args={"typ
                             intersection_neigh = neighset.intersection(neighsetneigh)
                             union_neigh = neighset.union(neighsetneigh)
                             jaccard_sim = Decimal(len(intersection_neigh) / len(union_neigh))
-                            sum_jaccard_sim += jaccard_sim
                             count = count + 1
                             denom = Decimal(2 ** (our_graph.nodes[node]['stamp']))
                             r = (jaccard_sim / denom)
@@ -740,7 +731,6 @@ def simulation(realworld_graph=None, num_red=1, orange_p=0, k=5, dict_args={"typ
                             intersection_neigh = neighset.intersection(neighsetneigh)
                             union_neigh = neighset.union(neighsetneigh)
                             jaccard_sim = Decimal(len(intersection_neigh) / len(union_neigh))
-                            sum_jaccard_sim += jaccard_sim
                             count = count + 1
                             denom = Decimal(2 ** (our_graph.nodes[node]['stamp']))
                             r = (jaccard_sim / denom)
@@ -789,7 +779,6 @@ def simulation(realworld_graph=None, num_red=1, orange_p=0, k=5, dict_args={"typ
                             intersection_neigh = neighset.intersection(neighsetneigh)
                             union_neigh = neighset.union(neighsetneigh)
                             jaccard_sim = Decimal(len(intersection_neigh) / len(union_neigh))
-                            sum_jaccard_sim += jaccard_sim
                             count = count + 1
                             denom = Decimal(2 ** (our_graph.nodes[node]['stamp']))
                             r = (jaccard_sim / denom)
@@ -817,70 +806,70 @@ def simulation(realworld_graph=None, num_red=1, orange_p=0, k=5, dict_args={"typ
                         current_num_red = current_num_red - 1
                     else:
                         neighlist = list(our_graph.adj[node])
-                        # only consider the white neighbors these are the only ones that can be influenced
-                        for neigh in [neigh for neigh in neighlist if
-                                      our_graph.nodes[neigh]['vote'] == NODE_COLOR_WHITE]:
-                            # manually add the nodes to their own neighborhoods
-                            neighset = set(our_graph.adj[node])
-                            neighset.add(node)
-                            neighsetneigh = set(our_graph.adj[neigh])
-                            neighsetneigh.add(neigh)
-                            intersection_neigh = neighset.intersection(neighsetneigh)
-                            union_neigh = neighset.union(neighsetneigh)
-                            jaccard_sim = Decimal(len(intersection_neigh) / len(union_neigh))
-                            sum_jaccard_sim += jaccard_sim
-                            count = count + 1
-                            denom = Decimal(2 ** (our_graph.nodes[node]['stamp']))
-                            r = (jaccard_sim / denom)
-                            rand = random.random()
-                            if rand < r:
-                                rand2_doubt = random.random()
-                                if (our_graph.nodes[neigh]['doubt'] < rand2_doubt):
-                                    our_graph.nodes[neigh]['vote'] = NODE_COLOR_RED
-                                    change = change + 1
-                                    current_num_red = current_num_red + 1
-                                    current_num_white = current_num_white - 1
+                        for neigh in neighlist:
+                            # only consider the white neighbors these are the only ones that can be influenced
+                            if our_graph.nodes[neigh]['vote'] == NODE_COLOR_WHITE:
+                                neighset = set(our_graph.adj[node])
+                                # manually add the nodes to their own neighborhoods
+                                neighset.add(node)
+                                neighsetneigh = set(our_graph.adj[neigh])
+                                neighsetneigh.add(neigh)
+                                intersection_neigh = neighset.intersection(neighsetneigh)
+                                union_neigh = neighset.union(neighsetneigh)
+                                jaccard_sim = Decimal(len(intersection_neigh) / len(union_neigh))
+                                count = count + 1
+                                denom = Decimal(2 ** (our_graph.nodes[node]['stamp']))
+                                r = (jaccard_sim / denom)
+                                rand = random.random()
+                                if rand < r:
+                                    rand2_doubt = random.random()
+                                    if our_graph.nodes[neigh]['doubt'] < rand2_doubt:
+                                        our_graph.nodes[neigh]['vote'] = NODE_COLOR_RED
+                                        change = change + 1
+                                        current_num_red = current_num_red + 1
+                                        current_num_white = current_num_white - 1
 
-                                    # reduce doubt
-                                    delta_doubt = random.uniform(0, negative_doubt_shift)
-                                    our_graph.nodes[neigh]['doubt'] += delta_doubt
-                                    our_graph.nodes[neigh]['origin'].append((doubt_counter, delta_doubt))
-                                    doubt_counter += 1
-                                    doubt_spreader.append(neigh)
-                                    if (our_graph.nodes[neigh]['doubt'] < 0):
-                                        our_graph.nodes[neigh]['doubt'] = 0
-                                else:
-                                    # add doubt
-                                    delta_doubt = random.uniform(0, positive_doubt_shift)
-                                    our_graph.nodes[neigh]['doubt'] += delta_doubt
-                                    our_graph.nodes[neigh]['origin'].append((doubt_counter, delta_doubt))
-                                    doubt_counter += 1
-                                    doubt_spreader.append(neigh)
-                                    if (our_graph.nodes[neigh]['doubt'] > 1):
-                                        our_graph.nodes[neigh]['doubt'] = 1
-
+                                        # reduce doubt
+                                        delta_doubt = random.uniform(0, negative_doubt_shift)
+                                        our_graph.nodes[neigh]['doubt'] += delta_doubt
+                                        our_graph.nodes[neigh]['origin'].append((doubt_counter, delta_doubt))
+                                        doubt_counter += 1
+                                        doubt_spreader.append(neigh)
+                                        if our_graph.nodes[neigh]['doubt'] < 0:
+                                            our_graph.nodes[neigh]['doubt'] = 0
+                                    else:
+                                        # add doubt
+                                        delta_doubt = random.uniform(0, positive_doubt_shift)
+                                        our_graph.nodes[neigh]['doubt'] += delta_doubt
+                                        our_graph.nodes[neigh]['origin'].append((doubt_counter, delta_doubt))
+                                        doubt_counter += 1
+                                        doubt_spreader.append(neigh)
+                                        if our_graph.nodes[neigh]['doubt'] > 1:
+                                            our_graph.nodes[neigh]['doubt'] = 1
                 # spread doubts
                 print("Updating doubt values")
-                while (len(doubt_spreader) > 0):
+                doubt_spreader_tmp=[]
+                while len(doubt_spreader) > 0:
                     d_node = doubt_spreader.pop()
                     if our_graph.nodes[d_node]["vote"] == NODE_COLOR_ORANGE:
                         continue
                     (d, delta) = our_graph.nodes[d_node]['origin'][-1]
                     for neigh in our_graph.neighbors(d_node):
-                        if (d in [x for (x, y) in our_graph.nodes[d_node]['origin']]):
+                        if d in [x for (x, y) in our_graph.nodes[d_node]['origin']]:
                             continue
                         else:
                             delta_doubt = random.uniform(0, delta)
                             our_graph.nodes[neigh]['doubt'] += delta_doubt
                             our_graph.nodes[neigh]['origin'].append((d, delta_doubt))
-                            doubt_spreader.append(neigh)
+                            doubt_spreader_tmp.append(neigh)
+                doubt_spreader.extend(doubt_spreader_tmp)
                 doubt_ls = []
                 for node in our_graph.nodes():
                     doubt_ls.append(our_graph.nodes[node]["doubt"])
                 plt.clf()
                 plt.hist(doubt_ls, bins=30)
                 plt.show(block=False)
-                plt.pause(0.5)
+                plt.pause(0.25)
                 plt.close()
             # running experiments with the doubt spreading counter measure (END)
             print("round", round, "phase", phase, current_num_orange, current_num_white, current_num_red,
@@ -889,6 +878,7 @@ def simulation(realworld_graph=None, num_red=1, orange_p=0, k=5, dict_args={"typ
             list_num_red.append(current_num_red)
             list_num_orange.append(current_num_orange)
             list_num_green.append(current_num_green)
+            step+=1
             print("list_num_white", list_num_white)
             print("list_num_red", list_num_red)
             print("list_num_gray", list_num_orange)

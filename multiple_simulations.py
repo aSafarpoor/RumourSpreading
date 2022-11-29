@@ -125,7 +125,81 @@ def green_info_simulation(num_experiments, dataset, parameters_list):
     plt.xlabel("rounds", fontdict=None, labelpad=None)
     plt.ylabel("the fraction of orange nodes", fontdict=None, labelpad=None)
     for j in range(len(parameters_list)):
-        plt.plot(avg_outputs[j], label=dataset["name"] + r"-$\Delta=$ " + str(parameters_list[j]["start_time"]),
+        plt.plot(avg_outputs[j], label=dataset["name"] + r"-$\Delta=$ " + str(parameters_list[j]["start_time"])+
+                 ", high degree: "+("True" if parameters_list[j]["high_degree_selection_strategy"] else "False"),
+                 linewidth=2)
+        leg = plt.legend()
+        leg_lines = leg.get_lines()
+        leg_texts = leg.get_texts()
+        plt.setp(leg_lines, linewidth=2)
+        plt.setp(leg_texts, fontsize='large')
+    plt.savefig('Output/' + str(dataset["name"]) + "-averages")
+    plt.show(block=False)
+    plt.pause(0.5)
+    plt.close()
+
+
+def doubt_simulation(num_experiments, dataset, parameters_list):
+    avg_outputs = list()
+    for j in range(len(parameters_list)):
+        outputs = [0] * num_experiments
+        avg_output = list()
+        max_len = 0
+        for i in range(num_experiments):
+            dict_counter_measure_doubt_spreading = parameters_list[j]
+            [list_num_white, list_num_red, list_num_orange, list_num_green] = \
+                simulation(realworld_graph=dataset, num_red=1, orange_p=0,
+                           k=5, visualization=False, dict_args=None, dict_counter_measure=
+                           dict_counter_measure_doubt_spreading, seed=None)
+            outputs[i] = list_num_orange
+            if max_len < len(outputs[i]):
+                max_len = len(outputs[i])
+                avg_output = [0] * max_len
+        f = open('Output/output_negative_doubt_shift_' +
+                 str(dict_counter_measure_doubt_spreading["negative_doubt_shift"]) + "_positive_doubt_shift_" +
+                 str(dict_counter_measure_doubt_spreading["positive_doubt_shift"]) + ".txt", 'w')
+        for i in range(num_experiments):
+            outputs[i].extend([outputs[i][-1]] * (max_len - len(outputs[i])))
+            f.write("outputs[ " + str(i) + " ]=" + repr(outputs[i]) + '\n')
+            f.write("--------------------------------------------\n")
+            avg_output = [sum(x) for x in zip(avg_output, outputs[i])]
+
+        avg_output = [x / num_experiments for x in avg_output]
+        f.write("avg_output=" + repr(avg_output) + '\n')
+        f.close()
+
+        plt.clf()
+        plt.xlabel("rounds", fontdict=None, labelpad=None)
+        plt.ylabel("the fraction of orange nodes", fontdict=None, labelpad=None)
+        plt.title(
+            "The average ratios of " + str(num_experiments) + " experiments on " + dataset["name"] +
+            " with pd = " + str(dict_counter_measure_doubt_spreading["positive_doubt_shift"]) +
+            " with nd = " + str(dict_counter_measure_doubt_spreading["negative_doubt_shift"]))
+        plt.plot(avg_output, label=dataset["name"] + "_pd=" + str(parameters_list[j]["positive_doubt_shift"])
+                                   + "_nd=" + str(parameters_list[j]["negative_doubt_shift"]), linewidth=2)
+
+        leg = plt.legend()
+        leg_lines = leg.get_lines()
+        leg_texts = leg.get_texts()
+        plt.setp(leg_lines, linewidth=2)
+        plt.setp(leg_texts, fontsize='large')
+        plt.savefig('Output/' + str(dataset["name"]) + "-" + str(j))
+        plt.show(block=False)
+        plt.pause(0.5)
+        plt.close()
+
+        avg_outputs.append(avg_output)
+
+    plt.clf()
+    plt.title(
+        "The average ratios of " + str(num_experiments) + " experiments on " + dataset["name"] +
+        r" with different pd and nd values")
+    plt.xlabel("rounds", fontdict=None, labelpad=None)
+    plt.ylabel("the fraction of orange nodes", fontdict=None, labelpad=None)
+    for j in range(len(parameters_list)):
+        plt.plot(avg_outputs[j],
+                 label=dataset["name"] + "_pd=" + str(parameters_list[j]["positive_doubt_shift"]) + "_nd=" + str(
+                     parameters_list[j]["negative_doubt_shift"]),
                  linewidth=2)
         leg = plt.legend()
         leg_lines = leg.get_lines()
@@ -145,8 +219,8 @@ if __name__ == "__main__":
     else:
         dataset = twitter
 
+    parameters_list = list()
     if sys.argv[2] == "0":
-        parameters_list = list()
         parameters_list.append({"type": COUNTER_MEASURE_COMMUNITY_DETECTION, "threshold_detection": 0.01,
                                 "threshold_block": 0.05})
         parameters_list.append({"type": COUNTER_MEASURE_COMMUNITY_DETECTION, "threshold_detection": 0.05,
@@ -158,9 +232,7 @@ if __name__ == "__main__":
         parameters_list.append({"type": COUNTER_MEASURE_COMMUNITY_DETECTION, "threshold_detection": 0.2,
                                 "threshold_block": 0.05})
         community_detection_simulation(int(sys.argv[3]), dataset, parameters_list)
-    else:
-        parameters_list = list()
-
+    elif sys.argv[2] == "1":
         parameters_list.append({"type": COUNTER_MEASURE_GREEN_INFORMATION, "start_time": 1,
                                 "num_green": 1, "green_spreading_ratio": 0.5,
                                 "high_degree_selection_strategy": True})
@@ -178,3 +250,15 @@ if __name__ == "__main__":
                                 "high_degree_selection_strategy": True})
 
         green_info_simulation(int(sys.argv[3]), dataset, parameters_list)
+    else:
+        parameters_list.append({"type": COUNTER_MEASURE_DOUBT_SPREADING, "negative_doubt_shift": -0.05,
+                                "positive_doubt_shift": 0.05})
+        parameters_list.append({"type": COUNTER_MEASURE_DOUBT_SPREADING, "negative_doubt_shift": -0.1,
+                                "positive_doubt_shift": 0.1})
+        parameters_list.append({"type": COUNTER_MEASURE_DOUBT_SPREADING, "negative_doubt_shift": -0.15,
+                                "positive_doubt_shift": 0.15})
+        parameters_list.append({"type": COUNTER_MEASURE_DOUBT_SPREADING, "negative_doubt_shift": -0.15,
+                                "positive_doubt_shift": 0.1})
+        parameters_list.append({"type": COUNTER_MEASURE_DOUBT_SPREADING, "negative_doubt_shift": -0.1,
+                                "positive_doubt_shift": 0.15})
+        doubt_simulation(int(sys.argv[3]), dataset, parameters_list)
