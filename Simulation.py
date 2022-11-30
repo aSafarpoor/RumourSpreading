@@ -224,6 +224,10 @@ def getInitialOpinions(graph, num_red, orange_p):
     for red_node in red_nodes:
         graph.nodes[red_node]['vote'] = NODE_COLOR_RED
     # selecting `num_red` white nodes randomly and turning them red (END)
+    # set a blocked flag to all edges to be able to track them (START)
+    for edge in graph.edges:
+        graph.edges[edge]["blocked"] = 0
+    # set a blocked flag to all edges to be able to track them (END)
     return graph
 
 
@@ -256,170 +260,6 @@ def moderatelyExpander(degree_of_each_supernode, number_of_supernodes, nodes_in_
     return G
 
 
-# def Simulation_Charlotte(our_graph, type_graph, num_red, k, dict_args, dict_counter_measure):
-#      our_graph = GetInitialOpinions(graph=our_graph, num_red=num_red, orange_p=0)
-#     stop = 0
-#     phase = 0
-#     n = our_graph.number_of_nodes()
-#     count = 0
-#
-#     cur_num_red = num_red
-#     cur_num_gray = 0
-#     cur_num_white = our_graph.number_of_nodes() - num_red
-#     list_num_gray = [cur_num_gray]
-#     list_num_red = [cur_num_red]
-#     list_num_white = [cur_num_white]
-#
-#     step = 1
-#     while stop != 1:
-#         phase = phase + 1
-#         # print("phase", phase)
-#         change = 0
-#         for round in range(k + 1):
-#             hit_nodes = set()
-#             hit_nodes_list = []
-#             for node in [node for node in our_graph.nodes if our_graph.nodes[node]['vote'] == NODE_COLOR_RED]:
-#                 our_graph.nodes[node]['stamp'] = our_graph.nodes[node]['stamp'] + 1
-#                 # the node has been black for k rounds and becomes gray
-#                 if our_graph.nodes[node]['stamp'] == k:
-#                     our_graph.nodes[node]['vote'] = NODE_COLOR_GRAY
-#                     cur_num_gray = cur_num_gray + 1
-#                     cur_num_red = cur_num_red - 1
-#                     change += 1
-#                 else:
-#                     neighlist = list(our_graph.adj[node])
-#                     # only consider the white neighbors these are the only ones that can be influenced
-#                     for neigh in [neigh for neigh in neighlist if
-#                                   our_graph.nodes[neigh]['vote'] == NODE_COLOR_WHITE]:
-#                         # manually add the nodes to their own neighborhoods
-#                         neighset = set(our_graph.adj[node])
-#                         neighset.add(node)
-#                         neighsetneigh = set(our_graph.adj[neigh])
-#                         neighsetneigh.add(neigh)
-#                         intersection_neigh = neighset.intersection(neighsetneigh)
-#                         if len(intersection_neigh) > 1:
-#                             our_graph.nodes[neigh]['triangle'] = 1
-#                         union_neigh = neighset.union(neighsetneigh)
-#                         jaccard_sim = Decimal(len(intersection_neigh) / len(union_neigh))
-#                         count = count + 1
-#                         denom = Decimal(2 ** (our_graph.nodes[node]['stamp']))
-#                         r = (jaccard_sim / denom)
-#                         rand = random.random()
-#                         if rand < r:
-#                             our_graph.nodes[neigh]['hit_counter'] += 1
-#                             hit_nodes.add(neigh)
-#             for node in hit_nodes:
-#                 if dict_counter_measure["type"] == COUNTER_MEASURE_NONE:
-#                     our_graph.nodes[node]['vote'] = NODE_COLOR_RED
-#                     change = change + 1
-#                     cur_num_red = cur_num_red + 1
-#                     cur_num_white = cur_num_white - 1
-#                 if dict_counter_measure['id'] == COUNTER_MEASURE_HEAR_FROM_AT_LEAST_TWO:
-#                     if our_graph.nodes[node]['hit_counter'] >= 2:
-#                         our_graph.nodes[node]['vote'] = NODE_COLOR_RED
-#                         change = change + 1
-#                         cur_num_red += 1
-#                         cur_num_white -= 1
-#                     else:
-#                         our_graph.nodes[node]['vote'] = NODE_COLOR_WHITE
-#                 if dict_counter_measure['id'] == COUNTER_MEASURE_TRIANGLE:
-#                     if our_graph.nodes[node]['triangle'] >= 1:
-#                         our_graph.nodes[node]['vote'] = NODE_COLOR_RED
-#                         change = change + 1
-#                         cur_num_red += 1
-#                         cur_num_white -= 1
-#                     else:
-#                         our_graph.nodes[node]['vote'] = NODE_COLOR_GRAY
-#                         change = change + 1
-#                         cur_num_gray += 1
-#                         cur_num_white -= 1
-#
-#
-#
-#
-#
-#
-#             # print("round", round, "phase", phase, cur_num_gray, cur_num_white, cur_num_red)
-#             list_num_white.append(cur_num_white)
-#             list_num_red.append(cur_num_red)
-#             list_num_gray.append(cur_num_gray)
-#             print("listnumwhite", list_num_white)
-#             print("listnumblack", list_num_red)
-#             print("listnumgray", list_num_gray)
-#             step += 1
-#         # print("change", change)
-#         if change == 0:
-#             stop = 1
-#
-#
-#     return list_num_gray, n
-
-
-# def Simulation_no_countermeasure(graph, type_graph, num_red, k, dict_args):
-#     our_graph = getGraph(graph=graph, type_graph=type_graph, dict_args=dict_args)
-#     our_graph = GetInitialOpinions(graph=our_graph, num_red=num_red, orange_p=0)
-#     stop = 0
-#     phase = 0
-#     count = 0
-#     n = our_graph.number_of_nodes()
-#
-#     for node in our_graph.nodes:
-#         # stamp indicates the number of rounds a node has been black
-#         our_graph.nodes[node]['stamp'] = 0
-#
-#     cur_num_red = num_red
-#     cur_num_gray = 0
-#     cur_num_white = our_graph.number_of_nodes() - num_red
-#     list_num_gray = [cur_num_gray]
-#     list_num_black = [cur_num_red]
-#     list_num_white = [cur_num_white]
-#
-#     step = 1
-#     while stop != 1:
-#         phase = phase + 1
-#         change = 0
-#         for round in range(k + 1):
-#             for node in [node for node in our_graph.nodes if our_graph.nodes[node]['vote'] == NODE_COLOR_RED]:
-#                 our_graph.nodes[node]['stamp'] = our_graph.nodes[node]['stamp'] + 1
-#                 # the node has been black for k rounds and becomes gray
-#                 if our_graph.nodes[node]['stamp'] == k:
-#                     our_graph.nodes[node]['vote'] = NODE_COLOR_ORANGE
-#                     cur_num_gray = cur_num_gray + 1
-#                     cur_num_red = cur_num_red - 1
-#                 else:
-#                     neighlist = list(our_graph.adj[node])
-#                     # only consider the white neighbors these are the only ones that can be influenced
-#                     for neigh in [neigh for neigh in neighlist if
-#                                   our_graph.nodes[neigh]['vote'] == NODE_COLOR_WHITE]:
-#                         # manually add the nodes to their own neighborhoods
-#                         neighset = set(our_graph.adj[node])
-#                         neighset.add(node)
-#                         neighsetneigh = set(our_graph.adj[neigh])
-#                         neighsetneigh.add(neigh)
-#                         intersection_neigh = neighset.intersection(neighsetneigh)
-#                         union_neigh = neighset.union(neighsetneigh)
-#                         jaccard_sim = Decimal(len(intersection_neigh) / len(union_neigh))
-#                         count = count + 1
-#                         denom = Decimal(2 ** (our_graph.nodes[node]['stamp']))
-#                         r = (jaccard_sim / denom)
-#                         rand = random.random()
-#                         if rand < r:
-#                             our_graph.nodes[neigh]['vote'] = NODE_COLOR_RED
-#                             change = change + 1
-#                             cur_num_red = cur_num_red + 1
-#                             cur_num_white = cur_num_white - 1
-#
-#             list_num_white.append(cur_num_white)
-#             list_num_black.append(cur_num_red)
-#             list_num_gray.append(cur_num_gray)
-#
-#             step += 1
-#             if change == 0:
-#                 stop = 1
-#
-#     return list_num_gray, n
-
-
 def simulation(realworld_graph=None, num_red=1, orange_p=0, k=5, dict_args={"type": TYPE_ERDOS_RENYI, "n": 200},
                dict_counter_measure={"type": COUNTER_MEASURE_NONE}, visualization=False, seed=None):
     """
@@ -444,12 +284,12 @@ def simulation(realworld_graph=None, num_red=1, orange_p=0, k=5, dict_args={"typ
     # setting random seed value (END)
 
     # Generating the graph (START)
-    if (realworld_graph != None and dict_args != None):
+    if realworld_graph is not None and dict_args is not None:
         our_graph = getSNLikeGraph(realworld_graph=realworld_graph, type_graph=dict_args["type"])  # create synthetic
         # graphs similar to the real world graph
-    elif (realworld_graph == None and dict_args != None):
+    elif realworld_graph is None and dict_args is not None:
         our_graph = getGraph(dict_args=dict_args)  # create synthetic networks
-    elif (realworld_graph != None and dict_args == None):
+    elif realworld_graph is not None and dict_args is None:
         our_graph = getGraph(dict_args=realworld_graph)  # create realworld networks
     # Generating the graph (START)
 
@@ -465,8 +305,8 @@ def simulation(realworld_graph=None, num_red=1, orange_p=0, k=5, dict_args={"typ
     # assigning initial values to the variables (START)
     for node in our_graph.nodes:
         our_graph.nodes[node]['stamp'] = 0
-        if (dict_counter_measure["type"] == COUNTER_MEASURE_DELAYED_SPREADING):
-            if (our_graph.nodes[node]['vote'] == NODE_COLOR_RED):
+        if dict_counter_measure["type"] == COUNTER_MEASURE_DELAYED_SPREADING:
+            if our_graph.nodes[node]['vote'] == NODE_COLOR_RED:
                 our_graph.nodes[node]['sleep_timer'] = dict_counter_measure["sleep_timer"]
     # assigning initial values to the variables (END)
 
@@ -514,8 +354,10 @@ def simulation(realworld_graph=None, num_red=1, orange_p=0, k=5, dict_args={"typ
                     current_num_white -= 1
     # choosing green nodes for green information counter measure (END)
     # setting values and detecting communities to be used in community detection counter measure (START)
+
     threshold_detection = 0
     threshold_block = 0
+    sum_blocked = 0
     cs = []
     if dict_counter_measure["type"] == COUNTER_MEASURE_COMMUNITY_DETECTION:
         threshold_detection = dict_counter_measure["threshold_detection"]
@@ -534,15 +376,15 @@ def simulation(realworld_graph=None, num_red=1, orange_p=0, k=5, dict_args={"typ
     positive_doubt_shift = 0.0
     doubt_spreader = []
     doubt_ls = []
-    if (dict_counter_measure["type"] == COUNTER_MEASURE_DOUBT_SPREADING):
+    if dict_counter_measure["type"] == COUNTER_MEASURE_DOUBT_SPREADING:
         negative_doubt_shift = dict_counter_measure["negative_doubt_shift"]
         positive_doubt_shift = dict_counter_measure["positive_doubt_shift"]
         for node in our_graph.nodes():
             our_graph.nodes[node]["doubt"] = random.normalvariate(0.5, 0.16)
             our_graph.nodes[node]['origin'] = []
-            if (our_graph.nodes[node]["doubt"] > 1):
+            if our_graph.nodes[node]["doubt"] > 1:
                 our_graph.nodes[node]["doubt"] = 1
-            if (our_graph.nodes[node]["doubt"] < 0):
+            if our_graph.nodes[node]["doubt"] < 0:
                 our_graph.nodes[node]["doubt"] = 0
             doubt_ls.append(our_graph.nodes[node]["doubt"])
         # plotting doubt values of the nodes (can be disabled in case of necessity) (START)
@@ -559,6 +401,7 @@ def simulation(realworld_graph=None, num_red=1, orange_p=0, k=5, dict_args={"typ
     list_num_red = [current_num_red]
     list_num_white = [current_num_white]
     list_num_green = [current_num_green]
+    list_num_blocked_edges = [0]
     # Arrays to keep the track of the number of nodes in different colors during the experiments (START)
     # Simulation loop (START)
     step = 1
@@ -629,7 +472,7 @@ def simulation(realworld_graph=None, num_red=1, orange_p=0, k=5, dict_args={"typ
                                         jaccard_sim = Decimal(len(intersection_neigh) / len(union_neigh))
                                         count = count + 1
                                         denom = Decimal(2 ** (our_graph.nodes[node]['stamp']))
-                                        r = float(jaccard_sim / denom)*dict_counter_measure["green_spreading_ratio"]
+                                        r = float(jaccard_sim / denom) * dict_counter_measure["green_spreading_ratio"]
                                         rand = random.random()
                                         if rand < r:
                                             our_graph.nodes[neigh]['vote'] = NODE_COLOR_GREEN
@@ -746,18 +589,26 @@ def simulation(realworld_graph=None, num_red=1, orange_p=0, k=5, dict_args={"typ
             elif dict_counter_measure["type"] == COUNTER_MEASURE_COMMUNITY_DETECTION:
                 red_nodes = [node for node in our_graph.nodes if our_graph.nodes[node]['vote'] == NODE_COLOR_RED]
                 maxes = []
-                if (len(red_nodes) >= (int)(our_graph.number_of_nodes() * threshold_detection)):
+                if len(red_nodes) >= int(our_graph.number_of_nodes() * threshold_detection):
                     red_ratio_per_community = []
                     counter = 0
                     for c in cs:
                         red_ratio_per_community.append(0)
                         for n in c:
-                            if (our_graph.nodes[n]['vote'] == NODE_COLOR_RED):
+                            if our_graph.nodes[n]['vote'] == NODE_COLOR_RED:
                                 red_ratio_per_community[counter] += 1
                         red_ratio_per_community[counter] = red_ratio_per_community[counter] / len(c)
 
                         if red_ratio_per_community[counter] >= threshold_block:
                             maxes.append(counter)
+                            for n in cs[counter]:
+                                for edge_n in our_graph.edges(n):
+                                    if ((edge_n[0] == n and our_graph.nodes[edge_n[1]]["comm"] != our_graph.nodes[n][
+                                        "comm"])
+                                            or (edge_n[1] == n and our_graph.nodes[edge_n[0]]["comm"] !=
+                                                our_graph.nodes[n]["comm"])):
+                                        our_graph.edges[edge_n]["blocked"] += 1
+                                        sum_blocked += 1
                         counter += 1
                 for node in red_nodes:
                     our_graph.nodes[node]['stamp'] = our_graph.nodes[node]['stamp'] + 1
@@ -784,8 +635,8 @@ def simulation(realworld_graph=None, num_red=1, orange_p=0, k=5, dict_args={"typ
                             r = (jaccard_sim / denom)
                             rand = random.random()
                             if rand < r:
-                                if (our_graph.nodes[node]["comm"] in maxes):
-                                    if (our_graph.nodes[neigh]["comm"] != our_graph.nodes[node]["comm"]):
+                                if our_graph.nodes[node]["comm"] in maxes:
+                                    if our_graph.nodes[neigh]["comm"] != our_graph.nodes[node]["comm"]:
                                         print("the spread of rumor from #" + str(node) + " to #" +
                                               str(neigh) + " has been blocked because #" + str(
                                             node) + " is in the blocked community")
@@ -848,7 +699,7 @@ def simulation(realworld_graph=None, num_red=1, orange_p=0, k=5, dict_args={"typ
                                             our_graph.nodes[neigh]['doubt'] = 1
                 # spread doubts
                 print("Updating doubt values")
-                doubt_spreader_tmp=[]
+                doubt_spreader_tmp = []
                 while len(doubt_spreader) > 0:
                     d_node = doubt_spreader.pop()
                     if our_graph.nodes[d_node]["vote"] == NODE_COLOR_ORANGE:
@@ -878,11 +729,13 @@ def simulation(realworld_graph=None, num_red=1, orange_p=0, k=5, dict_args={"typ
             list_num_red.append(current_num_red)
             list_num_orange.append(current_num_orange)
             list_num_green.append(current_num_green)
-            step+=1
+            list_num_blocked_edges.append(sum_blocked)
+            step += 1
             print("list_num_white", list_num_white)
             print("list_num_red", list_num_red)
-            print("list_num_gray", list_num_orange)
+            print("list_num_orange", list_num_orange)
             print("list_num_green", list_num_green)
+            print("list_num_blocked_Edges", list_num_blocked_edges)
             if visualization:
                 net = Network()
                 for n in our_graph.nodes:
@@ -908,4 +761,4 @@ def simulation(realworld_graph=None, num_red=1, orange_p=0, k=5, dict_args={"typ
         list_num_white[ind] = list_num_white[ind] / our_graph.number_of_nodes()
         list_num_red[ind] = list_num_red[ind] / our_graph.number_of_nodes()
         list_num_green[ind] = list_num_green[ind] / our_graph.number_of_nodes()
-    return [list_num_white, list_num_red, list_num_orange, list_num_green]
+    return [list_num_white, list_num_red, list_num_orange, list_num_green, list_num_blocked_edges]
