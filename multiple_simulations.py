@@ -4,7 +4,9 @@ from Utility.dataset_setup import *
 import sys
 
 
-def community_detection_simulation(num_experiments, dataset, parameters_list):
+def community_detection_simulation(num_experiments, dataset, parameters_list, output_folder):
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
     avg_outputs = list()
     avg_outputs_edges = list()
     for j in range(len(parameters_list)):
@@ -25,7 +27,9 @@ def community_detection_simulation(num_experiments, dataset, parameters_list):
                 max_len = len(outputs[i])
                 avg_output = [0] * max_len
                 avg_output_edges = [0] * max_len
-        f = open('Output/output_' + str(dict_counter_measure_community_detection["threshold_detection"]) + ".txt", 'w')
+        f = open(
+            output_folder + '/output_' + str(dict_counter_measure_community_detection["threshold_detection"]) + ".txt",
+            'w')
         for i in range(num_experiments):
             outputs[i].extend([outputs[i][-1]] * (max_len - len(outputs[i])))
             outputs_edges[i].extend([outputs_edges[i][-1]] * (max_len - len(outputs_edges[i])))
@@ -55,7 +59,7 @@ def community_detection_simulation(num_experiments, dataset, parameters_list):
         leg_texts = leg.get_texts()
         plt.setp(leg_lines, linewidth=2)
         plt.setp(leg_texts, fontsize='large')
-        plt.savefig('Output/' + str(dataset["name"]) + "-" + str(j))
+        plt.savefig(output_folder+'/' + str(dataset["name"]) + "-" + str(j))
         plt.show(block=False)
         plt.pause(0.5)
         plt.close()
@@ -76,7 +80,7 @@ def community_detection_simulation(num_experiments, dataset, parameters_list):
         leg_texts = leg.get_texts()
         plt.setp(leg_lines, linewidth=2)
         plt.setp(leg_texts, fontsize='large')
-        plt.savefig('Output/' + str(dataset["name"]) + "-" + str(j) + "-edges")
+        plt.savefig(output_folder+'/' + str(dataset["name"]) + "-" + str(j) + "-edges")
         plt.show(block=False)
         plt.pause(0.5)
         plt.close()
@@ -99,7 +103,7 @@ def community_detection_simulation(num_experiments, dataset, parameters_list):
         leg_texts = leg.get_texts()
         plt.setp(leg_lines, linewidth=2)
         plt.setp(leg_texts, fontsize='large')
-    plt.savefig('Output/' + str(dataset["name"]) + "-averages")
+    plt.savefig(output_folder+'/' + str(dataset["name"]) + "-averages")
     plt.show(block=False)
     plt.pause(0.5)
     plt.close()
@@ -120,14 +124,16 @@ def community_detection_simulation(num_experiments, dataset, parameters_list):
         leg_texts = leg.get_texts()
         plt.setp(leg_lines, linewidth=2)
         plt.setp(leg_texts, fontsize='large')
-    plt.savefig('Output/' + str(dataset["name"]) + "-averages-edges")
+    plt.savefig(output_folder+'/' + str(dataset["name"]) + "-averages-edges")
     plt.show(block=False)
     plt.pause(0.5)
     plt.close()
     # ****
 
 
-def green_info_simulation(num_experiments, dataset, parameters_list):
+def green_info_simulation(num_experiments, dataset, parameters_list, output_folder):
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
     avg_outputs = list()
     for j in range(len(parameters_list)):
         outputs = [0] * num_experiments
@@ -135,7 +141,7 @@ def green_info_simulation(num_experiments, dataset, parameters_list):
         max_len = 0
         for i in range(num_experiments):
             dict_counter_measure_green_information = parameters_list[j]
-            [list_num_white, list_num_red, list_num_orange, list_num_green] = \
+            [list_num_white, list_num_red, list_num_orange, list_num_green,list_num_blocked_edges] = \
                 simulation(realworld_graph=dataset, num_red=1, orange_p=0,
                            k=5, visualization=False, dict_args=None, dict_counter_measure=
                            dict_counter_measure_green_information, seed=None)
@@ -143,7 +149,8 @@ def green_info_simulation(num_experiments, dataset, parameters_list):
             if max_len < len(outputs[i]):
                 max_len = len(outputs[i])
                 avg_output = [0] * max_len
-        f = open('Output/output_' + str(dict_counter_measure_green_information["start_time"]) + ".txt", 'w')
+
+        f = open(output_folder + '/output_' + str(dict_counter_measure_green_information["start_time"]) + ".txt", 'w')
         for i in range(num_experiments):
             outputs[i].extend([outputs[i][-1]] * (max_len - len(outputs[i])))
             f.write("outputs[ " + str(i) + " ]=" + repr(outputs[i]) + '\n')
@@ -167,7 +174,7 @@ def green_info_simulation(num_experiments, dataset, parameters_list):
         leg_texts = leg.get_texts()
         plt.setp(leg_lines, linewidth=2)
         plt.setp(leg_texts, fontsize='large')
-        plt.savefig('Output/' + str(dataset["name"]) + "-" + str(j))
+        plt.savefig(output_folder+'/' + str(dataset["name"]) + "-" + str(j))
         plt.show(block=False)
         plt.pause(0.5)
         plt.close()
@@ -190,13 +197,15 @@ def green_info_simulation(num_experiments, dataset, parameters_list):
         leg_texts = leg.get_texts()
         plt.setp(leg_lines, linewidth=2)
         plt.setp(leg_texts, fontsize='large')
-    plt.savefig('Output/' + str(dataset["name"]) + "-averages")
+    plt.savefig(output_folder+'/' + str(dataset["name"]) + "-averages")
     plt.show(block=False)
     plt.pause(0.5)
     plt.close()
 
 
-def doubt_simulation(num_experiments, dataset, parameters_list):
+def doubt_simulation(num_experiments, dataset, parameters_list, output_folder):
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
     avg_outputs = list()
     for j in range(len(parameters_list)):
         outputs = [0] * num_experiments
@@ -204,7 +213,7 @@ def doubt_simulation(num_experiments, dataset, parameters_list):
         max_len = 0
         for i in range(num_experiments):
             dict_counter_measure_doubt_spreading = parameters_list[j]
-            [list_num_white, list_num_red, list_num_orange, list_num_green] = \
+            [list_num_white, list_num_red, list_num_orange, list_num_green, list_num_blocked_edges] = \
                 simulation(realworld_graph=dataset, num_red=1, orange_p=0,
                            k=5, visualization=False, dict_args=None, dict_counter_measure=
                            dict_counter_measure_doubt_spreading, seed=None)
@@ -212,7 +221,7 @@ def doubt_simulation(num_experiments, dataset, parameters_list):
             if max_len < len(outputs[i]):
                 max_len = len(outputs[i])
                 avg_output = [0] * max_len
-        f = open('Output/output_negative_doubt_shift_' +
+        f = open(output_folder + '/output_negative_doubt_shift_' +
                  str(dict_counter_measure_doubt_spreading["negative_doubt_shift"]) + "_positive_doubt_shift_" +
                  str(dict_counter_measure_doubt_spreading["positive_doubt_shift"]) + ".txt", 'w')
         for i in range(num_experiments):
@@ -240,7 +249,7 @@ def doubt_simulation(num_experiments, dataset, parameters_list):
         leg_texts = leg.get_texts()
         plt.setp(leg_lines, linewidth=2)
         plt.setp(leg_texts, fontsize='large')
-        plt.savefig('Output/' + str(dataset["name"]) + "-" + str(j))
+        plt.savefig(output_folder+'/' + str(dataset["name"]) + "-" + str(j))
         plt.show(block=False)
         plt.pause(0.5)
         plt.close()
@@ -262,8 +271,8 @@ def doubt_simulation(num_experiments, dataset, parameters_list):
         leg_lines = leg.get_lines()
         leg_texts = leg.get_texts()
         plt.setp(leg_lines, linewidth=2)
-        plt.setp(leg_texts, fontsize='large')
-    plt.savefig('Output/' + str(dataset["name"]) + "-averages")
+        plt.setp(leg_texts, fontsize=12)
+    plt.savefig(output_folder+'/' + str(dataset["name"]) + "-averages")
     plt.show(block=False)
     plt.pause(0.5)
     plt.close()
@@ -288,7 +297,7 @@ if __name__ == "__main__":
                                 "threshold_block": 0.05})
         parameters_list.append({"type": COUNTER_MEASURE_COMMUNITY_DETECTION, "threshold_detection": 0.2,
                                 "threshold_block": 0.05})
-        community_detection_simulation(int(sys.argv[3]), dataset, parameters_list)
+        community_detection_simulation(int(sys.argv[3]), dataset, parameters_list, sys.argv[4])
     elif sys.argv[2] == "1":
         parameters_list.append({"type": COUNTER_MEASURE_GREEN_INFORMATION, "start_time": 1,
                                 "num_green": 1, "green_spreading_ratio": 0.5,
@@ -306,7 +315,7 @@ if __name__ == "__main__":
                                 "num_green": 1, "green_spreading_ratio": 0.5,
                                 "high_degree_selection_strategy": True})
 
-        green_info_simulation(int(sys.argv[3]), dataset, parameters_list)
+        green_info_simulation(int(sys.argv[3]), dataset, parameters_list, sys.argv[4])
     else:
         parameters_list.append({"type": COUNTER_MEASURE_DOUBT_SPREADING, "negative_doubt_shift": -0.05,
                                 "positive_doubt_shift": 0.05})
@@ -318,4 +327,4 @@ if __name__ == "__main__":
                                 "positive_doubt_shift": 0.1})
         parameters_list.append({"type": COUNTER_MEASURE_DOUBT_SPREADING, "negative_doubt_shift": -0.1,
                                 "positive_doubt_shift": 0.15})
-        doubt_simulation(int(sys.argv[3]), dataset, parameters_list)
+        doubt_simulation(int(sys.argv[3]), dataset, parameters_list, sys.argv[4])
