@@ -1,9 +1,9 @@
-.pytest_cache/*
-.vscode/*
-.idea/*
-Results/*
-venv/*
-__pycache__
-Output/*
+/.pytest_cache/
+/.vscode/
+/.idea/
+/Results/
+/venv/
+/__pycache__/
+/Output/
 ./multiple_simulations_community_detection.py
-lib
+/lib/
