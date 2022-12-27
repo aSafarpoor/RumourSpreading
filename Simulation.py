@@ -9,7 +9,7 @@ import networkx.algorithms.community as nx_comm
 import matplotlib.pyplot as plt
 import math
 from Utility.dataset_setup import *
-from pyvis.network import Network
+import igraph as ig
 from statistics import mean
 import time
 
@@ -403,6 +403,12 @@ def simulation(realworld_graph=None, num_red=1, orange_p=0, k=5, dict_args={"typ
     list_num_green = [current_num_green]
     list_num_blocked_edges = [0]
     # Arrays to keep the track of the number of nodes in different colors during the experiments (START)
+
+    # Visualization setup
+    h = ig.Graph.from_networkx(our_graph)
+    layout = h.layout("fr")
+    # Visualization setup
+
     # Simulation loop (START)
     step = 1
     while stop != 1:
@@ -737,21 +743,25 @@ def simulation(realworld_graph=None, num_red=1, orange_p=0, k=5, dict_args={"typ
             print("list_num_green", list_num_green)
             print("list_num_blocked_Edges", list_num_blocked_edges)
             if visualization:
-                net = Network()
+                visual_style = {}
+                visual_style["vertex_size"] = 10
+                visual_style["vertex_color"] = []
+                # visual_style["edge_width"] = [1 + 2 * int(is_formal) for is_formal in g.es["is_formal"]]
                 for n in our_graph.nodes:
-                    if our_graph.nodes[node]['vote'] == NODE_COLOR_ORANGE:
-                        net.add_node(n_id=n, color="orange")
-                    elif our_graph.nodes[node]['vote'] == NODE_COLOR_WHITE:
-                        net.add_node(n_id=n, color="white")
-                    elif our_graph.nodes[node]['vote'] == NODE_COLOR_GREEN:
-                        net.add_node(n_id=n, color="green")
-                    elif our_graph.nodes[node]['vote'] == NODE_COLOR_RED:
-                        net.add_node(n_id=n, color="red")
-                    elif our_graph.nodes[node]['vote'] == NODE_COLOR_PALE_GREEN:
-                        net.add_node(n_id=n, color="#98FB98")
-                for e in our_graph.edges():
-                    net.add_edge(e[0], e[1])
-                net.show("Output/" + str(round) + ".html")
+                    if our_graph.nodes[n]['vote'] == NODE_COLOR_ORANGE:
+                        visual_style["vertex_color"].append("orange")
+                    elif our_graph.nodes[n]['vote'] == NODE_COLOR_WHITE:
+                        visual_style["vertex_color"].append("white")
+                    elif our_graph.nodes[n]['vote'] == NODE_COLOR_GREEN:
+                        visual_style["vertex_color"].append("green")
+                    elif our_graph.nodes[n]['vote'] == NODE_COLOR_RED:
+                        visual_style["vertex_color"].append("red")
+                    elif our_graph.nodes[n]['vote'] == NODE_COLOR_PALE_GREEN:
+                        visual_style["vertex_color"].append("#98FB98")
+                visual_style["layout"] = layout
+                visual_style["bbox"] = (1200, 1200)
+                visual_style["margin"] = 10
+                ig.plot(h, "Output/social_network" + str(step) + ".png",**visual_style)
         print("change", change)
         if change == 0:
             stop = 1
