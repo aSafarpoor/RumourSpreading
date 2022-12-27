@@ -17,6 +17,7 @@ COUNTER_MEASURE_DELAYED_SPREADING = 3
 COUNTER_MEASURE_COMMUNITY_DETECTION = 4
 COUNTER_MEASURE_DOUBT_SPREADING = 5
 COUNTER_MEASURE_TRIANGLE = 6
+COUNTER_MEASURE_FACTCHECKING = 7
 # counter measure IDs
 # node color IDs
 NODE_COLOR_RED = 1
@@ -31,15 +32,15 @@ NODE_COLOR_GREEN = 3
 
 def BigSimulation(num_runs, graph_loc, type_graph, num_red,k, dict_args, dict_counter_measure):
     our_graph = GetGraph(graph_loc=graph_loc, type_graph=type_graph, dict_args=dict_args)
-    averages = averaging(num_runs=num_runs, our_graph=our_graph, type_graph=type_graph,num_red=num_red, k=k, dict_args=dict_args, dict_counter_measure=dict_counter_measure)
+    averages = averaging(num_runs=num_runs, our_graph=our_graph,num_red=num_red, k=k, dict_args=dict_args, dict_counter_measure=dict_counter_measure)
     return averages
 
 
 
-def averaging(num_runs,our_graph, type_graph, num_red, k, dict_args, dict_counter_measure):
+def averaging(num_runs,our_graph,num_red, k, dict_args, dict_counter_measure):
     listoflists= []
     for i in range(num_runs):
-        graylist, n = Simulation_Charlotte(our_graph=our_graph, type_graph=type_graph, num_red=num_red, k=k, dict_args=dict_args, dict_counter_measure=dict_counter_measure)
+        graylist, n = Simulation(our_graph=our_graph, num_red=num_red, k=k, dict_args=dict_args, dict_counter_measure=dict_counter_measure)
         listoflists.append(graylist)
 
     #find the list of maximum length
@@ -81,8 +82,6 @@ def averaging_acorss_experiments(listoflists):
     #print(len(padded_listoflists))
 
     return padded_listoflists
-
-
 
 
 
