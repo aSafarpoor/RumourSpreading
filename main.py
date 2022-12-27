@@ -170,7 +170,7 @@ if __name__ == "__main__":
     # counter measure args (END)
 
     # running the simulation (START)
-    [list_num_white, list_num_red, list_num_orange, list_num_green] = \
+    [list_num_white, list_num_red, list_num_orange, list_num_green, list_num_blocked_edges] = \
         simulation(realworld_graph=facebook, num_red=1, orange_p=0,
                    k=5, visualization=False, dict_args=None, dict_counter_measure=
                    dict_counter_measure_green_information, seed=9)
