@@ -10,7 +10,6 @@ import math
 from statistics import mean
 import time
 
-#charlotte's path
 abs_path = os.path.abspath(os.path.dirname(__file__))
 
 
