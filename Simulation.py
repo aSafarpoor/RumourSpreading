@@ -717,7 +717,7 @@ def Sim_CM4(our_graph, num_red, k, dict_args, dict_counter_measure):
         change = 0
         for round in range(k + 1):
             new_green = 0
-            # check the thresholds for the community counter measure
+            
             for node in [node for node in our_graph.nodes if
                          our_graph.nodes[node]['vote'] == NODE_COLOR_RED or our_graph.nodes[node][
                              'vote'] == NODE_COLOR_GREEN]:
