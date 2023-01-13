@@ -1,0 +1,536 @@
+****
+## Explenation on the project
+
+
+This is the code used for the paper Why Rumors Spread Fast in Social Networks, and How to Stop It
+
+## Dependencies and Data
+To run the code, please make sure to download the datasets
+from the following sites:
+
+Facebook: http://snap.stanford.edu/data/ego-Facebook.html \
+Twitter: http://snap.stanford.edu/data/ego-Twitter.html \
+Google+: http://snap.stanford.edu/data/ego-Gplus.html \
+Twitch: http://snap.stanford.edu/data/twitch-social-networks.html
+
+All the datasets are already provided in the folder "networks" inside the code directory
+The local paths are set in the init of the module IMP
+
+To use this code, one should install the dependencies that you find
+listed in the file _requirements.txt._ file in the code directory.
+
+It would be easy if these would be installed in a virtual environment
+
+```angular2
+#install pipenv if you don't have this
+pip install --user pipenv
+pipenv install
+```
+
+
+To update the requirements file:
+```angular2
+pipenv lock -r > requirements.txt
+```
+
+However, if you don't want to set up a virtual environment you can
+still download the requirements as follows
+```angular2
+#make sure to run this command in the code directory
+pip install -r requirements.txt
+```
+
+The code in particular heavily depends on
+```angular2
+networkit==5.0.1
+networkx==2.3
+```
+## Code Structure
+The module IMP (which contains all the code) consists of four files
+- main: from which the code is run
+- simulation: the implementation of our rumor spreading model and all the counter measures
+- averaging: a function that generates the correct graph structure based on the social network considered and a dummy
+function that repeats the experiments several times in the case that it involves randomness and takes the average of all
+experiments.
+
+dict_counter_measure = {'id':COUNTER_MEASURE_FACTCHECKING, 'num_green':1, 'start_time':4, 'green_spreading_ratio':0.5,
+                            'p_orange_h':0.05, 'p_orange_r':0.1, 'p_coinflip':0.7, 'frac_green':0.1, 'threshold_detection':0.05,
+                            'threshold_block':0.05}
+    dict_args = {"degree_of_supernodes":150, "number_of_supernodes": 1000, "nodes_in_clique": 16}
+
+## How to run the experiments
+- To obtain the results for the Flower graph and no counter measures:
+Run main with parameters
+num_runs=50,
+graph_loc=fb_loc (this will be overwritten we do not use this)
+type_graph="FlowerGraph",
+num_red=1,
+k=5,
+dict_args={"num_cliques": 1000, "nodes_in_clique": 16}
+dict_counter_measure={'id':COUNTER_MEASURE_NONE}
+
+
+- ME graph and no countermeasures for D=50 (used in Figure 1a)
+num_runs=50,
+graph_loc=fb_loc (this will be overwritten we do not use this)
+type_graph='moderatelyExpander',
+num_red=1,
+k=5,
+dict_args={"degree_of_supernodes":50, "number_of_supernodes": 1000, "nodes_in_clique": 16}
+dict_counter_measure={'id':COUNTER_MEASURE_NONE}
+
+- ME graph and no countermeasure for D=150
+num_runs=50,
+graph_loc=fb_loc (this will be overwritten we do not use this)
+type_graph='moderatelyExpander',
+num_red=1,
+k=5,
+dict_args={"degree_of_supernodes":150, "number_of_supernodes": 1000, "nodes_in_clique": 16}
+dict_counter_measure={'id':COUNTER_MEASURE_NONE}
+
+- ER-high (used in Figure 1a) and no countermeasure
+num_runs=50,
+graph_loc=fb_loc (this will be overwritten we do not use this)
+type_graph='ER',
+num_red=1,
+k=5,
+dict_args={"num_nodes":16000, "p":4/ math.sqrt{16000}}
+dict_counter_measure={'id':COUNTER_MEASURE_NONE}
+
+- ER-low (used in Figure 1a) and no countermeasure
+num_runs=50,
+graph_loc=fb_loc (this will be overwritten we do not use this)
+type_graph='ER',
+num_red=1,
+k=5,
+dict_args={"num_nodes":16000, "p":1/(4 * math.sqrt{16000})}
+dict_counter_measure={'id':COUNTER_MEASURE_NONE}
+
+- FB SN no countermeasure
+num_runs=50,
+graph_loc=fb_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_args={}
+dict_counter_measure={'id':COUNTER_MEASURE_NONE}
+
+- FB HRG no countermeasure
+num_runs=50,
+graph_loc=fb_loc
+type_graph='HRG',
+num_red=1,
+k=5,
+dict_args={}
+dict_counter_measure={'id':COUNTER_MEASURE_NONE}
+
+TW SN no countermeasure
+num_runs=50,
+graph_loc=twitter_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_args={}
+dict_counter_measure={'id':COUNTER_MEASURE_NONE}
+
+TW HRG no countermeasure
+num_runs=50,
+graph_loc=twitter_loc
+type_graph='HRG',
+num_red=1,
+k=5,
+dict_args={}
+dict_counter_measure={'id':COUNTER_MEASURE_NONE}
+
+T-GE SN no countermeasure
+num_runs=50,
+graph_loc=musea_DE_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_args={}
+dict_counter_measure={'id':COUNTER_MEASURE_NONE}
+
+T-GE HRG no countermeasure
+num_runs=50,
+graph_loc=musea_DE_loc
+type_graph='HRG',
+num_red=1,
+k=5,
+dict_args={}
+dict_counter_measure={'id':COUNTER_MEASURE_NONE}
+
+T-FR SN no countermeasure
+num_runs=50,
+graph_loc=musea_FR_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_args={}
+dict_counter_measure={'id':COUNTER_MEASURE_NONE}
+
+T-FR HRG no countermeasure
+num_runs=50,
+graph_loc=musea_FR_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_args={}
+dict_counter_measure={'id':COUNTER_MEASURE_NONE}
+
+G+ SN no countermeasure
+num_runs=50,
+graph_loc=Gplus_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_args={}
+dict_counter_measure={'id':COUNTER_MEASURE_NONE}
+
+G+ HRG no countermeasure
+num_runs=50,
+graph_loc= Gplus_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_args={}
+dict_counter_measure={'id':COUNTER_MEASURE_NONE}
+
+FB-CM1
+num_runs=50,
+graph_loc=fb_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_ORANGE_NODES, 'p_orange_h':0.05,'p_orange_r':0.1}
+dict_args = {}
+
+TW-CM1
+num_runs=50,
+graph_loc=twitter_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_ORANGE_NODES, 'p_orange_h':0.05,'p_orange_r':0.1}
+dict_args = {}
+
+ME-CM1
+num_runs=50,
+graph_loc=fb_loc (will be overwritten)
+type_graph='moderatelyExpander',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_ORANGE_NODES, 'p_orange_h':0.05,'p_orange_r':0.1}
+dict_args = {"degree_of_supernodes":150, "number_of_supernodes": 1000, "nodes_in_clique": 16}
+
+T-GE-CM1
+num_runs=50,
+graph_loc=musea_DE_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_ORANGE_NODES, 'p_orange_h':0.05,'p_orange_r':0.1}
+dict_args = {}
+
+T-FR-CM1
+num_runs=50,
+graph_loc=musea_FR_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_ORANGE_NODES, 'p_orange_h':0.05,'p_orange_r':0.1}
+dict_args = {}
+
+G+-CM1
+num_runs=50,
+graph_loc=Gplus_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_ORANGE_NODES, 'p_orange_h':0.05,'p_orange_r':0.1}
+dict_args = {}
+
+FB-CM2
+num_runs=10,
+graph_loc=fb_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_COMMUNITY_DETECTION,'threshold_detection':0.05,
+                            'threshold_block':0.05}
+dict_args = {}
+
+TW-CM2
+num_runs=10,
+graph_loc=twitter_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_COMMUNITY_DETECTION,'threshold_detection':0.05,
+                            'threshold_block':0.05}
+dict_args = {}
+
+ME-CM2
+num_runs=10,
+graph_loc=fb_loc (will be overwritten)
+type_graph='moderatelyExpander',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_COMMUNITY_DETECTION,'threshold_detection':0.05,
+                            'threshold_block':0.05}
+dict_args = {"degree_of_supernodes":150, "number_of_supernodes": 1000, "nodes_in_clique": 16}
+
+T-GE-CM2
+num_runs=10,
+graph_loc= musea_DE_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_COMMUNITY_DETECTION,'threshold_detection':0.05,
+                            'threshold_block':0.05}
+dict_args = {}
+
+T-FR-CM2
+num_runs=10,
+graph_loc= musea_FR_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_COMMUNITY_DETECTION,'threshold_detection':0.05,
+                            'threshold_block':0.05}
+dict_args = {}
+
+G+-CM2
+num_runs=10,
+graph_loc= Gplus_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_COMMUNITY_DETECTION,'threshold_detection':0.05,
+                            'threshold_block':0.05}
+dict_args = {}
+
+FB-CM3
+num_runs=50,
+graph_loc=fb_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_ACCURACYFLAG, 'p_coinflip':0.7}
+dict_args = {}
+
+TW-CM3
+num_runs=50,
+graph_loc=twitter_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_ACCURACYFLAG, 'p_coinflip':0.7}
+dict_args = {}
+
+ME-CM3
+num_runs=50,
+graph_loc=fb_loc (will be overwritten)
+type_graph='moderatelyExpander',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_ACCURACYFLAG, 'p_coinflip':0.7}
+dict_args = {"degree_of_supernodes":150, "number_of_supernodes": 1000, "nodes_in_clique": 16}
+
+T-GE-CM3
+num_runs=50,
+graph_loc=musea_DE_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_ACCURACYFLAG, 'p_coinflip':0.7}
+dict_args = {}
+
+T-FR-CM3
+num_runs=50,
+graph_loc=musea_FR_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_ACCURACYFLAG, 'p_coinflip':0.7}
+dict_args = {}
+
+G+-CM3
+num_runs=50,
+graph_loc=Gplus_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_ACCURACYFLAG, 'p_coinflip':0.7}
+dict_args = {}
+
+FB-CM4
+num_runs=50,
+graph_loc=fb_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_GREEN_NODES, 'num_green':1, 'start_time':4, 'green_spreading_ratio':0.5}
+dict_args = {}
+
+TW-CM4
+num_runs=50,
+graph_loc=twitter_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_GREEN_NODES, 'num_green':1, 'start_time':4, 'green_spreading_ratio':0.5}
+dict_args = {}
+
+ME-CM4
+num_runs=50,
+graph_loc=fb_loc (will be overwritten)
+type_graph='moderatelyExpander',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_GREEN_NODES, 'num_green':1, 'start_time':4, 'green_spreading_ratio':0.5}
+dict_args = {"degree_of_supernodes":150, "number_of_supernodes": 1000, "nodes_in_clique": 16}
+
+T-GE-CM4
+num_runs=50,
+graph_loc=musea_DE_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_GREEN_NODES, 'num_green':1, 'start_time':4, 'green_spreading_ratio':0.5}
+dict_args = {}
+
+T-FR-CM4
+num_runs=50,
+graph_loc=musea_FR_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_GREEN_NODES, 'num_green':1, 'start_time':4, 'green_spreading_ratio':0.5}
+dict_args = {}
+
+G+-CM4
+num_runs=50,
+graph_loc=twitter_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_GREEN_NODES, 'num_green':1, 'start_time':4, 'green_spreading_ratio':0.5}
+dict_args = {}
+
+FB-CM5
+num_runs=50,
+graph_loc=fb_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_FACTCHECKING, 'frac_green':0.1}
+dict_args = {}
+
+TW-CM5
+num_runs=50,
+graph_loc=twitter_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_FACTCHECKING, 'frac_green':0.1}
+dict_args = {}
+
+ME-CM5
+num_runs=50,
+graph_loc=fb_loc (will be overwritten)
+type_graph='moderatelyExpander',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_FACTCHECKING, 'frac_green':0.1}
+dict_args = {"degree_of_supernodes":150, "number_of_supernodes": 1000, "nodes_in_clique": 16}
+
+T-GE-CM5
+num_runs=50,
+graph_loc=musea_DE_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_FACTCHECKING, 'frac_green':0.1}
+dict_args = {}
+
+T-FR-CM5
+num_runs=50,
+graph_loc=musea_FR_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_FACTCHECKING, 'frac_green':0.1}
+dict_args = {}
+
+G+-CM5
+num_runs=50,
+graph_loc=Gplus_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_FACTCHECKING, 'frac_green':0.1}
+dict_args = {}
+
+FB-CM6
+num_runs=50,
+graph_loc=fb_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_HEAR_FROM_AT_LEAST_TWO}
+dict_args = {}
+
+TW-CM6
+num_runs=50,
+graph_loc=twitter_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_HEAR_FROM_AT_LEAST_TWO}
+dict_args = {}
+
+ME-CM6
+num_runs=50,
+graph_loc=fb_loc (will be overwritten)
+type_graph='moderatelyExpander',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_HEAR_FROM_AT_LEAST_TWO}
+dict_args = {"degree_of_supernodes":150, "number_of_supernodes": 1000, "nodes_in_clique": 16}
+
+
+T-GE-CM6
+num_runs=50,
+graph_loc=musea_DE_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_HEAR_FROM_AT_LEAST_TWO}
+dict_args = {}
+
+
+T-FR-CM6
+num_runs=50,
+graph_loc=musea_FR_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_HEAR_FROM_AT_LEAST_TWO}
+dict_args = {}
+
+
+Gplus-CM6
+num_runs=50,
+graph_loc=Gplus_loc
+type_graph='SN',
+num_red=1,
+k=5,
+dict_counter_measure = {'id': COUNTER_MEASURE_HEAR_FROM_AT_LEAST_TWO}
+dict_args = {}
+
+Lastly, to get the results in Figure 3 in the appendix, run CM4 for different values for the delay parameter:1,2,4,8
+
+
+
+

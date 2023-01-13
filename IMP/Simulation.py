@@ -11,7 +11,7 @@ import math
 from statistics import mean
 import time
 
-#charlotte's path
+
 abs_path = os.path.abspath(os.path.dirname(__file__))
 
 from IMP import fb_loc, twitter_loc, SD_loc, Pokec_loc, Gplus_loc,  yt_loc, dblp_loc, Epinions_loc, ca_cit_loc, HR_loc, twitch_loc, wiki_loc, reddit_loc, \

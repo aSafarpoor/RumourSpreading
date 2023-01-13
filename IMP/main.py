@@ -20,9 +20,3 @@ if __name__ == "__main__":
 
 
     list_gray = BigSimulation(num_runs=3, graph_loc=Gplus_loc, type_graph='SN', num_red=1, k=5, dict_args=dict_args,dict_counter_measure=dict_counter_measure)
-    plt.clf()
-    plt.plot(list_gray, "orange", label="orange")
-    plt.legend(["SD"], loc=2)
-    plt.xlabel(r'rounds', fontsize=15)
-    plt.ylabel("fraction of orange nodes", fontsize=15)
-    plt.show()
