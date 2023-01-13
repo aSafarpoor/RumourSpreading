@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 *.jpg
 *.png
 venv
@@ -6,3 +7,14 @@ networks
 .idea
 .DS_Store
 *__pycache__*
+/.pytest_cache/
+/.vscode/
+/.idea/
+/Results/
+/venv/
+/__pycache__/
+/Output/
+./multiple_simulations_community_detection.py
+/lib/
+Output/
+Utility
