@@ -1,0 +1,8 @@
+*.jpg
+*.png
+venv
+plots.py
+networks
+.idea
+.DS_Store
+*__pycache__*
