@@ -14,8 +14,8 @@ import time
 
 abs_path = os.path.abspath(os.path.dirname(__file__))
 
-from IMP import fb_loc, twitter_loc, SD_loc, Pokec_loc, Gplus_loc,  yt_loc, dblp_loc, Epinions_loc, ca_cit_loc, HR_loc, twitch_loc, wiki_loc, reddit_loc, \
-    github_loc, deezer_loc, lastfm_loc, musea_DE_loc, musea_FR_loc
+
+from IMP import fb_loc, twitter_loc,  musea_DE_loc, musea_FR_loc
 
 
 # counter measure IDs
@@ -77,23 +77,13 @@ def moderatelyExpander(degree_of_each_supernode, number_of_supernodes, nodes_in_
 
 def GetGraph(graph_loc, type_graph, dict_args):
     print('graph loc', graph_loc)
-    if graph_loc == twitch_loc:
+    if graph_loc == musea_DE_loc:
         df = pd.read_csv(os.path.join(abs_path, graph_loc))
-        temp_graph = nx.from_pandas_edgelist(df, 'numeric_id_1', 'numeric_id_2')
-    elif graph_loc == github_loc:
-        df = pd.read_csv('/Users/charlotteout/PycharmProjects/RumorSpreading2/networks/musae_git_edges.csv')
-        temp_graph = nx.from_pandas_edgelist(df, 'id_1', 'id_2')
-    elif graph_loc == deezer_loc:
-        df = pd.read_csv('/Users/charlotteout/PycharmProjects/RumorSpreading2/networks/deezer_europe_edges.csv')
-        temp_graph = nx.from_pandas_edgelist(df, 'node_1', 'node_2')
-    elif graph_loc == lastfm_loc:
-        df = pd.read_csv(os.path.join(abs_path, graph_loc))
-        temp_graph = nx.from_pandas_edgelist(df, 'node_1', 'node_2')
-    elif graph_loc == musea_DE_loc:
-        df = pd.read_csv('/Users/charlotteout/PycharmProjects/RumorSpreading2/networks/musae_DE_edges.csv')
+        #df = pd.read_csv('/Users/charlotteout/PycharmProjects/RumorSpreading2/networks/musae_DE_edges.csv')
         temp_graph = nx.from_pandas_edgelist(df, 'from', 'to')
     elif graph_loc == musea_FR_loc:
-        df = pd.read_csv('/Users/charlotteout/PycharmProjects/RumorSpreading2/networks/musae_FR_edges.csv')
+        df = pd.read_csv(os.path.join(abs_path, graph_loc))
+        #df = pd.read_csv('/Users/charlotteout/PycharmProjects/RumorSpreading2/networks/musae_FR_edges.csv')
         temp_graph = nx.from_pandas_edgelist(df, 'from', 'to')
     else:
         temp_graph = nx.read_edgelist(os.path.join(abs_path, graph_loc), create_using=nx.Graph(), nodetype=int)
