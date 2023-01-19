@@ -20,30 +20,19 @@ listed in the file _requirements.txt._ file in the code directory.
 
 It would be easy if these would be installed in a virtual environment
 
-```angular2
 #install pipenv if you don't have this
 pip install --user pipenv
 pipenv install
-```
-
 
 To update the requirements file:
-```angular2
 pipenv lock -r > requirements.txt
-```
 
 However, if you don't want to set up a virtual environment you can
 still download the requirements as follows
-```angular2
 #make sure to run this command in the code directory
 pip install -r requirements.txt
-```
 
-The code in particular heavily depends on
-```angular2
-networkit==5.0.1
-networkx==2.3
-```
+
 ## Code Structure
 The module IMP (which contains all the code) consists of four files
 - main: from which the code is run
