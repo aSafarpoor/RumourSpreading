@@ -75,44 +75,5 @@ def averaging(num_runs,our_graph,num_red, k, dict_args, dict_counter_measure):
 
 
 
-def averaging_acorss_experiments(listoflists):
-    #find the list of maximum length
-    maxlen = len(listoflists[0])
-    for i in range(1, len(listoflists)):
-        if len(listoflists[i]) > maxlen:
-            maxlen = len(listoflists[i])
-
-    # padd all the lists to the max length and padd with the last value
-    padded_listoflists = []
-    for i in listoflists:
-        padding = [i[-1]] * (maxlen - len(i))
-        i.extend(padding)
-        print(i)
-        padded_listoflists.append(i)
-    #print(padded_listoflists)
-    #print(len(padded_listoflists))
-
-    return padded_listoflists
-
-def averaging2(listoflists):
-    # find the list of maximum length
-    n = 81306
-    maxlen = len(listoflists[0])
-    for i in range(1, len(listoflists)):
-        if len(listoflists[i]) > maxlen:
-            maxlen = len(listoflists[i])
-
-    # padd all the lists to the max length and padd with the last value
-    padded_listoflists = []
-    for i in listoflists:
-        padding = [i[-1]] * (maxlen - len(i))
-        i.extend(padding)
-        padlist = np.array(i)
-        padded_listoflists.append(padlist)
-    # do elementwise averaging
-    averages = list(np.mean(padded_listoflists, axis=0) / n)
-    print(averages)
-
-    return averages
 
 
