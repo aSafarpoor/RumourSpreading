@@ -13,7 +13,6 @@ Twitter: http://snap.stanford.edu/data/ego-Twitter.html \
 Google+: http://snap.stanford.edu/data/ego-Gplus.html \
 Twitch: http://snap.stanford.edu/data/twitch-social-networks.html
 
-All the datasets are already provided in the folder "networks" inside the code directory
 The local paths are set in the init of the module IMP
 
 To use this code, one should install the dependencies that you find
