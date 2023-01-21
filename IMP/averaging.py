@@ -15,10 +15,9 @@ import numpy as np
 from IMP.Simulation import *
 from IMP import fb_loc
 
-#charlotte's path
+
 abs_path = os.path.abspath(os.path.dirname(__file__))
-#sajjad's path
-#datasets_path = os.path.join(os.path.abspath(""), "Datasets")
+
 
 # counter measure IDs
 COUNTER_MEASURE_NONE = 0
