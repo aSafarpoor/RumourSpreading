@@ -79,11 +79,9 @@ def GetGraph(graph_loc, type_graph, dict_args):
     print('graph loc', graph_loc)
     if graph_loc == musea_DE_loc:
         df = pd.read_csv(os.path.join(abs_path, graph_loc))
-        #df = pd.read_csv('/Users/charlotteout/PycharmProjects/RumorSpreading2/networks/musae_DE_edges.csv')
         temp_graph = nx.from_pandas_edgelist(df, 'from', 'to')
     elif graph_loc == musea_FR_loc:
         df = pd.read_csv(os.path.join(abs_path, graph_loc))
-        #df = pd.read_csv('/Users/charlotteout/PycharmProjects/RumorSpreading2/networks/musae_FR_edges.csv')
         temp_graph = nx.from_pandas_edgelist(df, 'from', 'to')
     else:
         temp_graph = nx.read_edgelist(os.path.join(abs_path, graph_loc), create_using=nx.Graph(), nodetype=int)
@@ -94,17 +92,14 @@ def GetGraph(graph_loc, type_graph, dict_args):
 
     total = sum(j for i, j in list(temp_graph.degree(temp_graph.nodes)))
     av_deg = total / temp_graph.number_of_nodes()
-    #print("av_deg", av_deg)
     p = total / (temp_graph.number_of_nodes() * (temp_graph.number_of_nodes() - 1))
     d = round(n*p/2) *2
 
     if type_graph == 'ERSN':
-        # print("ER graph")
         our_graph = nx.fast_gnp_random_graph(n=temp_graph.number_of_nodes(), p=p)
     elif type_graph == 'ER':
         our_graph = nx.fast_gnp_random_graph(n=dict_args['num_nodes'], p=dict_args['p'])
     elif type_graph == 'BA':
-        # print("BA graph")
         our_graph = nx.barabasi_albert_graph(n=temp_graph.number_of_nodes(), m=int(av_deg))
     elif type_graph == "DREGSN":
         our_graph = nx.random_regular_graph(d=d, n=n)
@@ -177,9 +172,6 @@ def GetInitialOpinions(graph, num_red, dict_args, dict_counter_measure):
     if dict_counter_measure['id'] == COUNTER_MEASURE_GREEN_NODES:
         for (node,degrees) in graph.degree():
             if degrees > threshold_green_nodes - 1:
-                #print("passed the degree threshold")
-                #print("num green in counter measure", dict_counter_measure['num_green'])
-                #print("cur num green", cur_num_green)
                 if cur_num_green_i < dict_counter_measure['num_green']:
                     graph.nodes[node]['vote'] = NODE_COLOR_GREEN
                     cur_num_green_i = cur_num_green_i + 1
@@ -236,7 +228,6 @@ def Sim_CM5(graph,num_red, k, dict_args, dict_counter_measure):
 
     while stop != 1:
         phase = phase + 1
-        # print("phase", phase)
         change = 0
 
         for round in range(3*k + 3):
@@ -256,7 +247,6 @@ def Sim_CM5(graph,num_red, k, dict_args, dict_counter_measure):
                     intersection_neigh = neighset.intersection(neighsetneigh)
                     union_neigh = neighset.union(neighsetneigh)
                     jaccard_sim = Decimal(len(intersection_neigh) / len(union_neigh))
-                    #denom = Decimal(2 * 2 ** (our_graph.nodes[node]['stamp']))
                     r = (jaccard_sim)
                     rand = random.random()
                     if rand < r:
@@ -525,13 +515,8 @@ def Sim_CM2(our_graph, num_red, k, dict_args, dict_counter_measure):
     threshold_block = dict_counter_measure["threshold_block"]
 
     communities_dict = cl.best_partition(our_graph)
-    # print("communities", communities_dict)
-    # print("type communitiesdict", type(communities_dict))
-    # print("num communities", len(communities_dict))
-    # print("com keys", list(set(communities_dict.values())))
     list_index_coms = list(set(communities_dict.values()))
     listoflistcoms = []
-    # communities = community.community_louvain(our_graph)
     # now make a list of lists of all nodes in different communities
     for i in range(len(list_index_coms)):
         listoflistcoms.append([])
