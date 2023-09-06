@@ -4,20 +4,18 @@ import os
 import random
 from decimal import Decimal
 import networkx.algorithms.community as nx_comm
-from IMP import twitter_loc
 import matplotlib.pyplot as plt
 import math
 from statistics import mean
 import time
-
 import numpy as np
 #import pandas as pd
 from IMP.Simulation import *
-from IMP import fb_loc
-
+# from IMP import fb_loc, twitter_loc
+fb_loc = '../networks/facebook_combined.txt'
+twitter_loc = '../networks/twitter_combined.txt'
 
 abs_path = os.path.abspath(os.path.dirname(__file__))
-
 
 # counter measure IDs
 COUNTER_MEASURE_NONE = 0
@@ -36,16 +34,10 @@ NODE_COLOR_GRAY = 0
 NODE_COLOR_RESERVED = 2
 NODE_COLOR_GREEN = 3
 
-
-
-
-
 def BigSimulation(num_runs, graph_loc, type_graph, num_red,k, dict_args, dict_counter_measure):
     our_graph = GetGraph(graph_loc=graph_loc, type_graph=type_graph, dict_args=dict_args)
     averages = averaging(num_runs=num_runs, our_graph=our_graph,num_red=num_red, k=k, dict_args=dict_args, dict_counter_measure=dict_counter_measure)
     return averages
-
-
 
 def averaging(num_runs,our_graph,num_red, k, dict_args, dict_counter_measure):
     listoflists= []

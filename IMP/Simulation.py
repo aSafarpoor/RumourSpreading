@@ -1,22 +1,25 @@
 # imports
-import networkx as nx
-import networkit as nk
+from statistics import mean
 import os
 import random
-import pandas as pd
 from decimal import Decimal
-import community.community_louvain as cl
-import matplotlib.pyplot as plt
 import math
-from statistics import mean
 import time
+import networkx as nx
+import networkit as nk
+import pandas as pd
+import community.community_louvain as cl
+# import matplotlib.pyplot as plt
 
 
 abs_path = os.path.abspath(os.path.dirname(__file__))
 
 
-from IMP import fb_loc, twitter_loc,  musea_DE_loc, musea_FR_loc
-
+# from IMP import fb_loc, twitter_loc,  musea_DE_loc, musea_FR_loc
+twitter_loc = '../networks/twitter_combined.txt'
+fb_loc = '../networks/facebook_combined.txt'
+musea_DE_loc = '../networks/musae_DE_edges.csv'
+musea_FR_loc = '../networks/musae_FR_edges.csv'
 
 # counter measure IDs
 COUNTER_MEASURE_NONE = 0
@@ -73,8 +76,6 @@ def moderatelyExpander(degree_of_each_supernode, number_of_supernodes, nodes_in_
         H.remove_node(i)
     return G
 
-
-
 def GetGraph(graph_loc, type_graph, dict_args):
     print('graph loc', graph_loc)
     if graph_loc == musea_DE_loc:
@@ -128,7 +129,6 @@ def GetGraph(graph_loc, type_graph, dict_args):
                                            nodes_in_clique=dict_args["nodes_in_clique"])
 
     return our_graph
-
 
 def GetInitialOpinions(graph, num_red, dict_args, dict_counter_measure):
     cur_num_green_i = 0
@@ -205,7 +205,6 @@ def GetInitialOpinions(graph, num_red, dict_args, dict_counter_measure):
             graph.edges[edge]["blocked"] = 0
 
         return graph
-
 
 def Sim_CM5(graph,num_red, k, dict_args, dict_counter_measure):
     our_graph = GetInitialOpinions(graph=graph, num_red=num_red, dict_args=dict_args, dict_counter_measure=dict_counter_measure)
@@ -496,7 +495,6 @@ def Sim_CM1(our_graph, num_red, k,dict_args,dict_counter_measure):
             stop = 1
     return list_num_gray, n
 
-
 def Sim_CM2(our_graph, num_red, k, dict_args, dict_counter_measure):
     our_graph = GetInitialOpinions(graph=our_graph, num_red=num_red, dict_args=dict_args,
                                    dict_counter_measure=dict_counter_measure)
@@ -603,8 +601,6 @@ def Sim_CM2(our_graph, num_red, k, dict_args, dict_counter_measure):
             stop = 1
     return list_num_gray, n
 
-
-
 def Sim_CM3(our_graph, num_red, k,dict_args,dict_counter_measure):
     our_graph = GetInitialOpinions(graph=our_graph, num_red=num_red, dict_args=dict_args,
                                    dict_counter_measure=dict_counter_measure)
@@ -677,7 +673,6 @@ def Sim_CM3(our_graph, num_red, k,dict_args,dict_counter_measure):
         if change == 0:
             stop = 1
     return list_num_gray, n
-
 
 def Sim_CM4(our_graph, num_red, k, dict_args, dict_counter_measure):
     our_graph = GetInitialOpinions(graph=our_graph, num_red=num_red, dict_args=dict_args,
@@ -811,7 +806,6 @@ def Sim_CM4(our_graph, num_red, k, dict_args, dict_counter_measure):
             stop = 1
     return list_num_gray, n
 
-
 def Sim_CM6(our_graph, num_red, k, dict_args, dict_counter_measure):
     our_graph = GetInitialOpinions(graph=our_graph, num_red=num_red, dict_args=dict_args,
                                    dict_counter_measure=dict_counter_measure)
@@ -881,11 +875,6 @@ def Sim_CM6(our_graph, num_red, k, dict_args, dict_counter_measure):
         if change == 0:
             stop = 1
     return list_num_gray, n
-
-
-
-
-
 
 def Simulation(our_graph, num_red, k, dict_args, dict_counter_measure):
     if dict_counter_measure['id'] == COUNTER_MEASURE_FACTCHECKING:
